@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldpath="/plugins/system/articlesubtitleghsvs/fields">
+
+
+	<fields name="attribs" addfieldpath="/plugins/system/articlesubtitleghsvs/fields">
+
+		<!--Leider zu spät eingerichtet. Als Kenner für JRegistry-params, dass Plugin-Felder tatsächlich drin. Ansonsten muss attribs gemerged werden. -->
+		<field type="hidden" default="1" name="pluginarticlesubtitleghsvs" />
+
+<fieldset name="termin">
+			<field name="terminStartGhsvs" type="calendar"
+				label="TERMINSTARTGHSVS_LBL"
+				description="TERMINSTARTGHSVS_DESC"
+				format="%Y-%m-%d" size="10" maxlength="10" />
+
+			<field name="terminEndGhsvs" type="calendar"
+				label="TERMINENDGHSVS_LBL"
+				description="TERMINENDGHSVS_DESC"
+				format="%Y-%m-%d" size="10" maxlength="10" />
+
+			<field type="spacer" name="hypearticle_ghsvsspacer"
+			 label="HYPEARTICLEGHSVS_DESC" />
+			<field name="hypearticle_ghsvs" type="list" default="0"
+				label="HYPEARTICLEGHSVS_LBL"
+				description="">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+</fieldset>
+
+		<fieldset name="autorbeschreibung">
+
+			<field name="autorenaliasespacer" type="spacer"
+			 label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORENALIASE_DESC" />
+			<field name="autorenaliase" type="autorenaliase"
+				description=""
+				class=""
+				abCatAlias="autorbeschreibungghsvs"
+				multiple="true"
+				required="true"
+				label="COM_CONTENT_AUTORBESCHREIBUNGGHSVS_LBL">
+				<option value="JNONE">JNONE</option>
+			</field>
+
+			<field name="zitierweise_active" type="list" default="1"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL"
+				description="">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="autorbeschreibung_active" type="list" default="1"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
+				description="">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="danke_active" type="list" default="1"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DANKE_ACTIVE_LBL"
+				description="">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+		</fieldset>
+
+	</fields><!--/attribs-->
+
+	<fields name="images" label="COM_CONTENT_FIELD_IMAGE_OPTIONS">
+
+
+<!--
+		// Disziplinierungsmaßnahme:
+		// Deaktiviere Float-Einstellung für Einleitungs und >Beitragsbilder.
+		// Deaktiviere ALT-Text für Einleitungs und >Beitragsbilder.
+-->
+			<field
+				name="float_intro"
+				type="list"
+				label="COM_CONTENT_FLOAT_INTRO_LABEL"
+				description="COM_CONTENT_FLOAT_DESC"
+				default=""
+				readonly="true">
+					<option value="">JGLOBAL_USE_GLOBAL</option>
+					<option value="right">COM_CONTENT_RIGHT</option>
+					<option value="left">COM_CONTENT_LEFT</option>
+					<option value="none">COM_CONTENT_NONE</option>
+			</field>
+			<field name="image_intro_alt"
+				type="text"
+				label="COM_CONTENT_FIELD_IMAGE_ALT_LABEL"
+				description="COM_CONTENT_FIELD_IMAGE_ALT_DESC"
+				class="inputbox"
+				size="20"
+				readonly="true" />
+			<field
+				name="float_fulltext"
+				type="list"
+				label="COM_CONTENT_FLOAT_FULLTEXT_LABEL"
+				description="COM_CONTENT_FLOAT_DESC"
+				default=""
+				readonly="true">
+					<option value="">JGLOBAL_USE_GLOBAL</option>
+					<option value="right">COM_CONTENT_RIGHT</option>
+					<option value="left">COM_CONTENT_LEFT</option>
+					<option value="none">COM_CONTENT_NONE</option>
+			</field>
+			<field name="image_fulltext_alt"
+				type="text"
+				label="COM_CONTENT_FIELD_IMAGE_ALT_LABEL"
+				description="COM_CONTENT_FIELD_IMAGE_ALT_DESC"
+				class="inputbox"
+				size="20"
+				readonly="true" />
+
+
+
+
+	</fields>
+</form>

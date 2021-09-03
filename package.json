@@ -1,0 +1,77 @@
+{
+	"name": "plg_system_articlesubtitleghsvs",
+	"nameReal": "plg_system_articlesubtitleghsvs",
+	"filename": "articlesubtitleghsvs",
+	"version": "2021.09.03",
+	"versionCompare": "2015.07.07",
+	"update": {
+		"type": "plugin",
+		"folder": "system",
+		"client": "site",
+		"tag": "stable",
+		"targetplatform": ".*"
+	},
+	"releaseTxt": {
+		"title": "Joomla system plugin ArticleSubtitleGhsvs"
+	},
+	"changelog": {
+		"projecturl": "https://github.com/GHSVS-de/plg_system_articlesubtitleghsvs",
+		"infosDE": "",
+		"infosEN": "https://github.com/GHSVS-de/plg_system_articlesubtitleghsvs#readme",
+		"docsDE": "",
+		"docsEN": "",
+		"lastTests": [
+			"PHP 8",
+			"PHP 7.4",
+			"Joomla 3.10"
+		]
+	},
+	"minimumPhp": "7.2.0",
+	"maximumPhp": "8.9999.9999",
+	"minimumJoomla": "3.9.0",
+	"maximumJoomla": "4.9999.9999",
+	"allowDowngrades": "1",
+	"creationDate": "2014-10-23",
+	"licenseLong": "GNU General Public License version 3 or later; see LICENSE.txt.",
+	"copyright": "(C) 2014, G@HService Berlin Neukölln, Volkmar Volli Schlothauer (ghsvs.de)",
+	"author": {
+		"name": "G@HService Berlin Neukölln, Volkmar Volli Schlothauer",
+		"email": "",
+		"url": "https://www.ghsvs.de"
+	},
+	"contributors": [
+		{
+			"name": "G@HService Berlin Neukölln, Volkmar Volli Schlothauer",
+			"email": "",
+			"url": "https://www.ghsvs.de"
+		}
+	],
+	"bugs": "https://github.com/GHSVS-de/plg_system_articlesubtitleghsvs/issues",
+	"homepage": "https://github.com/GHSVS-de/plg_system_articlesubtitleghsvs#readme",
+	"keywords": [
+		"joomla",
+		"system plugin"
+	],
+	"private": false,
+	"description": "Joomla system plugin. A horrible code chaos from early days. Must be ported to Joomla 4 to eliminate it afterwards step by step because 2 sites still use it.",
+	"license": "GPL-3.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/GHSVS-de/plg_system_articlesubtitleghsvs.git"
+	},
+	"scripts": {
+		"g-build": "node build.js",
+		"g-npm-update-check": "ncu",
+		"g-ncu-override-json": "ncu -u"
+	},
+	"dependencies": {
+		"npm-check-updates": "^11.8.4"
+	},
+	"devDependencies": {
+		"adm-zip": "0.5.5",
+		"chalk": "^4.1.2",
+		"fs-extra": "10.0.0",
+		"rimraf": "3.0.2"
+	},
+	"browserslist": []
+}

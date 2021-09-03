@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="{{type}}" client="{{client}}" group="{{folder}}" method="upgrade">
+	<name>{{nameUpper}}</name>
+	<author>{{authorName}}</author>
+	<creationDate>{{creationDate}}</creationDate>
+	<copyright>{{copyright}}</copyright>
+	<license>{{licenseLong}}</license>
+	<authorUrl>{{authorUrl}}</authorUrl>
+	<version>{{version}}</version>
+	<description>{{nameUpper}}_XML_DESCRIPTION</description>
+
+	<versionHistory>
+0.0.1:
+2015.04.23:
+- Paar Descriptions hinzugefügt.
+- ImageResizer integriert.
+- ImageResizer für Einleitungsbilder fertig.
+2015.05.08:
+- ImageResizer für Beitragsbilder fertig.
+2015.07.07:
+- Bugfix autorenaliase.php Bindestrich aus z.B. plattee-Dr. Editha Platte entfernt, da Chosen sonst Dr. nicht findet.
+- Neue Einstellung image_popupghsvs_caption und in article-default.php integriert sowie JLayout ghsvs.full_image_venobox verfeinert. In kunstkontext.xml Einstellung venoboxghsvs für Popup (Artikeloptionen) hinzugefügt.
+	</versionHistory>
+
+	<updateservers><server type="extension" priority="1" name="{{nameUpper}}">https://raw.githubusercontent.com/GHSVS-de/upadateservers/master/{{name}}-update.xml</server></updateservers>
+
+	<changelogurl>https://raw.githubusercontent.com/GHSVS-de/upadateservers/master/{{name}}-changelog.xml</changelogurl>
+
+	<infourl>https://updates.ghsvs.de/changelog.php?file={{name}}</infourl>
+
+	<scriptfile>installerScript.php</scriptfile>
+	<minimumPhp>{{minimumPhp}}</minimumPhp>
+	<maximumPhp>{{maximumPhp}}</maximumPhp>
+	<minimumJoomla>{{minimumJoomla}}</minimumJoomla>
+	<maximumJoomla>{{maximumJoomla}}</maximumJoomla>
+	<allowDowngrades>{{allowDowngrades}}</allowDowngrades>
+
+	<files>
+		<filename plugin="{{filename}}">{{filename}}.php</filename>
+		<folder>fields</folder>
+		<folder>language</folder>
+		<folder>layouts-to-copy-to-admin-template</folder>
+		<folder>myforms</folder>
+		<folder>test</folder>
+		<folder>tmpl</folder>
+		<filename>installerScript.php</filename>
+		<filename>LICENSE.txt</filename>
+		<filename>resize.php</filename>
+	</files>
+
+	<config>
+		<fields name="params" addfieldpath="/plugins/{{folder}}/{{filename}}/fields/">
+
+			<fieldset name="imagesizer">
+				<field name="imageoptimizer" type="radio" default="0"
+				 class="btn-group"
+					label="Bildoptimierer aktiv"
+					description="">
+					<option value="0">JNO</option>
+     <option value="1">JYES</option>
+				</field>
+
+				<field name="image_intro_size" type="text"
+					default="w=360,quality=60,maxOnly=TRUE"
+					label="COM_CONTENT_FIELD_INTRO_LABEL"
+					description="" />
+
+				<field name="image_full_size" type="text"
+					default="w=550,quality=70,maxOnly=TRUE"
+					label="COM_CONTENT_FIELD_FULL_LABEL"
+					description="" />
+
+				<field name="cache_folder" type="text"
+					default="cache"
+					label="Ablageordner"
+					description="Unterverzeichnisse werden automatisch erzeugt." />
+
+				<field name="test_imagick_exec"
+					label="PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKEXEC_LABEL"
+					description=""
+					type="testimagick" />
+
+				<field name="test_imagick_class"
+					label="PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKCLASS_LABEL"
+					description=""
+					type="testimagick" />
+
+				<field name="test_imagick_jimage"
+					label="PLG_IMGRESIZECACHE_FIELD_TESTJIMAGE_LABEL"
+					description=""
+					type="testimagick" />
+
+				<field name="imagick_process" type="list"
+					default="class"
+					label="PLG_IMGRESIZECACHE_FIELD_IMAGICKPROCESS_LABEL"
+					description="">
+					<option value="exec">PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKEXEC_LABEL</option>
+					<option value="class">PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKCLASS_LABEL</option>
+					<option value="jimage">PLG_IMGRESIZECACHE_FIELD_TESTJIMAGE_LABEL</option>
+				</field>
+
+				<field name="imagick_path_to_convert" type="text"
+					default="convert"
+					label="PLG_IMGRESIZECACHE_FIELD_PATHTOCONVERT_LABEL"
+					description="PLG_IMGRESIZECACHE_FIELD_PATHTOCONVERT_DESC"
+				/>
+
+
+			</fieldset>
+
+
+
+			<fieldset name="basic">
+
+				<field name="load_in_templates" type="templates" default=""
+					label="Plugin in Template laden"
+					multiple="true"
+					size="10"
+					description="Leer = Alle. Das Plugin benötigt Template-Helper TplHelpGhsvs im Templateordner">
+				</field>
+
+				<field name="clear_plugin_placeholders" type="radio" default="1"
+				 class="btn-group"
+					label="Pluginplatzhalter entfernen"
+					description="Entfernt störende Pluginplatzhalter aus (Intro)Texten, bspw. für Galerien. {gallery xaz}">
+					<option value="0">JNO</option>
+     <option value="1">JYES</option>
+				</field>
+
+				<field name="clear_images" type="radio" default="1"
+				 class="btn-group"
+					label="Bilder entfernen"
+					description="Entfernt Bilder aus (Intro)Texten.">
+					<option value="0">JNO</option>
+     <option value="1">JYES</option>
+				</field>
+				<field name="contact_category_autorbeschreibung" type="category" default=""
+				 extension="com_contact"
+					required="true"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_CONTACT_CATEGORY_LBL"
+					description="">
+					<option value="">---Select a contact category---</option>
+				</field>
+
+				<field name="zitierweise_active" type="list" default="1"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL"
+					description=""
+					class="btn-group btn-group-yesno">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field name="autorbeschreibung_active" type="list" default="1"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
+					description=""
+					class="btn-group btn-group-yesno">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field name="danke_active" type="list" default="1"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DANKE_ACTIVE_LBL"
+					description=""
+					class="btn-group btn-group-yesno">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+			</fieldset>
+		</fields>
+	</config>
+
+</extension>
