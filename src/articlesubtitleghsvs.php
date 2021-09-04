@@ -2,6 +2,7 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\Utilities\ArrayHelper;
 
 class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 {
@@ -214,7 +215,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			// Wir haben Autorenaliase-IDs im Beitrag gefunden.
 			else
 			{
-				JArrayHelper::toInteger($this->autorenaliase);
+				ArrayHelper::toInteger($this->autorenaliase);
     $query = $this->db->getQuery(true);
 
 				// Datenbankabfrage der Autorenkategorie in der Kontaktkopmonente. Diese wird im Plugin gewählt.
@@ -243,7 +244,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 				else
 				{
 					// Array mit nur AutorenNamen.
-					$this->AutorenNames = JArrayHelper::getColumn($this->autorenaliase, 'name');
+					$this->AutorenNames = ArrayHelper::getColumn($this->autorenaliase, 'name');
 				}
 			}
 
