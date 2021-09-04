@@ -673,15 +673,12 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			//	Liefert $item->AutorenNames und $item->AutorenNamesConcated und $item->AutorenAliase
 			TplHelpGhsvs::getAutorenNamesFromContactAliase($article);
+
 			// Liefert $Item->combinedCatsGhsvs
 			TplHelpGhsvs::combineCats($article);
+
 			//	Liefert $item->concatedTagsGhsvs
 			TplHelpGhsvs::setTagsNamesToItem($article);
-			//letzte keep_forever Version in History
-			$article->lastKeepForever = TplHelpGhsvs::getLastKeepForever(
-				(isset($article->content_item_id) ? $article->content_item_id : $article->id),
-				$article->TypeAliasGhsvs
-			);
 
 			//	Liefert $item->concatedCatTagsGhsvs sowie Object $item->tagsCatGhsvs
 			TplHelpGhsvs::setCatTagsToItem($article);
