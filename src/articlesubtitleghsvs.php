@@ -174,7 +174,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 		// Article-View?
 		if (
-		 $this->app->isSite() &&
+		 $this->app->isClient('site') &&
 			in_array($context, $allowed_context) &&
 			$option == 'com_content' &&
 			$view == 'article' &&
@@ -256,7 +256,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// Kategorie/Hauptbeiträge-View?
 		elseif
 		(
-		 $this->app->isSite() &&
+		 $this->app->isClient('site') &&
 			in_array($context, $allowed_contextCat) &&
 			$option == 'com_content' &&
 			in_array($context, $allowed_contextCat) &&
@@ -381,7 +381,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 		// Wird im FE NICHT angezeigt, aber auch nicht versehentlich überschrieben/gelöscht.
 		// Also auf nicht required, damit beim Speichern nicht blockiert.
-		if ($this->app->isSite()){
+		if ($this->app->isClient('site')){
 		 $form->setFieldAttribute('autorenaliase', 'required', 'false', 'attribs');
 		}
 
