@@ -1,10 +1,13 @@
 <?php
 defined('_JEXEC') or die;
-class PlgSystemArticleSubtitleGhsvs extends JPlugin{
 
- protected $app;
- protected $db;
- protected $autoloadLanguage = true;
+use Joomla\CMS\Plugin\CMSPlugin;
+
+class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
+{
+	protected $app;
+	protected $db;
+	protected $autoloadLanguage = true;
 
 	// Eine Paranoia-Sicherungstabelle für Autorenaliase. Falls Plugin mal versehentlich deaktiviert wurde.
 	protected $MapTable = '#__autorbeschreibungghsvs_content_map';
@@ -61,7 +64,7 @@ class PlgSystemArticleSubtitleGhsvs extends JPlugin{
 
 		// Brauch ich in ein paar meiner Menüs. Zu faul, das jedesmal neu zu laden.
 		// 2015-04-24: Versteh nicht ganz. Vermutlich habe ich COM_CONTENT-Sprachplatzhalter irgendwo?
-		if ($this->app->isAdmin())
+		if ($this->app->isClient('administrator'))
 		{
 		 $lang = JFactory::getLanguage();
 		 $lang->load('com_content');
@@ -354,7 +357,7 @@ class PlgSystemArticleSubtitleGhsvs extends JPlugin{
 
   if(
 		 // Auch Editing im FE möglich. Deshalb raus:
-   # !$this->app->isAdmin() ||
+   # !$this->app->isClient('administrator') ||
    !in_array($form->getName(), $allowedContext)
   ){
    return true;
@@ -1016,7 +1019,7 @@ instance of Jreistry.
 		$option = $this->app->input->get('option', '', 'cmd');
 		$layout = $this->app->input->get('layout', '', 'cmd');
 		if (
-		 $this->app->isAdmin() &&
+		 $this->app->isClient('administrator') &&
 			in_array($context, $allowed_context) &&
 		 $layout == 'edit'
 		)
