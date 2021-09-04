@@ -1,5 +1,5 @@
 <?php
-/**
+/*
 com_tags/tag
 
 GHSVS 2015-01-01
@@ -16,7 +16,7 @@ JHtml::addIncludePath(JPATH_COMPONENT.'/helpers/html');
 $lang = JFactory::getLanguage();
 $lang->load('com_content');
 
-/* "core_" raus aus den Item-Properties 
+/* "core_" raus aus den Item-Properties
 Wird jetzt im Plugin erledigt
 */
 
@@ -27,7 +27,7 @@ if (!isset($this->item->slug))
 
 if (!isset($this->item->catslug))
  $this->item->catslug		= $this->item->category_alias ? ($this->item->catid.':'.$this->item->category_alias) : $this->item->catid;
-	
+
 if (!isset($this->item->parent_slug))
  $this->item->parent_slug	= $this->item->parent_alias ? ($this->item->parent_id . ':' . $this->item->parent_alias) : $this->item->parent_id;
 
@@ -37,7 +37,7 @@ if ($this->item->parent_alias == 'root')
 	$this->item->parent_slug = null;
 }
 
-$this->item->alternative_readmore = ''; 
+$this->item->alternative_readmore = '';
 
 // Beitragsparameter. Wird jetzt im Plugin erledigt.
 /*$this->item->params = new JRegistry;
@@ -55,14 +55,6 @@ $canEdit = $this->item->params->get('access-edit', 0);
 $info = $this->item->params->get('info_block_position', 0);
 
 $isCat = $this->item->type_alias == 'com_content.category';
-
-/*echo 'DEBUG-GHSVS<br />';
-echo $this->item->AutorenNamesConcated.'<br />';
-echo $this->item->combinedCatsGhsvs.'<br />';
-echo $this->item->concatedTagsGhsvs.'<br />';
-echo $this->item->lastKeepForever.'<br />';
-echo $this->item->concatedCatTagsGhsvs.'<br />';*/
-
 ?>
 <?php
 
@@ -87,13 +79,13 @@ if (
 <?php endif; ?>
 
 <?php // Todo Not that elegant would be nice to group the params ?>
-<?php 
+<?php
  $useDefList = (
 	$this->item->params->get('show_modify_date') ||
 	$this->item->params->get('show_publish_date') ||
-	$this->item->params->get('show_create_date') || 
-	$this->item->params->get('show_hits') || 
-	$this->item->params->get('show_category') || 
+	$this->item->params->get('show_create_date') ||
+	$this->item->params->get('show_hits') ||
+	$this->item->params->get('show_category') ||
 	$this->item->params->get('show_parent_category') ||
 	$this->item->params->get('show_author') ); ?>
 
