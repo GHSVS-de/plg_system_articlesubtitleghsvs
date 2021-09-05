@@ -511,16 +511,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	} # onContentAfterDisplay
 
 	/*
-	2015-07-19
-	Bspw. für Blogansichten des Moduls mod_articles_categoryghsvs.
-	Dort sollte onContentPrepare wegen anderer Plugins nicht aufgerufen werden.
-	*/
- public function onGhsvsModule($context, &$article, $params, $page = 0)
-	{
-		self::onContentPrepare($context, $article, $params, $page);
-	}
-
-	/*
 	 Achtung! Hier werden auch com_tags durchgeleitet, da dieses Scheiß Joomla in
 		Version 3.3.6 bspw das core_params nicht ausliest.
 		ToDo: Ab 3.4.2 sollte das Problem gelöst sein.
@@ -577,23 +567,9 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			$article->text .= $html;
 		}
 
-		// Reihenfolge bisschen unglücklich. $additionalAllows ist eigentlich nur für
-		// imageoptimizer
-		$additionalAllows = array(
-			'mod_articles_categorytraditionalghsvs.content'
-		);
-
-		if (in_array($context, $additionalAllows))
-		{
-			$old = $this->ContinueFECat;
-			$this->ContinueFECat = true;
-			self::mergeAttribsToParams($article);
-			$this->ContinueFECat = $old;
-		}
-
 		if (
 		 $this->ContinueFE
-			|| ($this->ContinueFECat || in_array($context, $additionalAllows))
+			|| ($this->ContinueFECat)
 		)
 		{
 			// Entfernt ggf. auch normale Bilder (aber nicht Einleitungsbild, nicht Beitragsbild).
@@ -607,7 +583,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			// In Blog, Hauptbeiträge sind nur Einleitungsbilder relevant, falls normale Bilder
 			// entfernt wurden. Siehe clean_images.
 		 if (
-			 ($this->ContinueFECat || in_array($context, $additionalAllows))
+			 ($this->ContinueFECat)
 				&& !$this->isBlogGhsvsListe
 				&& ($image_intro = $article->Images->get('image_intro', ''))
 				&& ($image_intro_size = $this->params->get(
@@ -676,7 +652,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			TplHelpGhsvs::setCatTagsToItem($article);
 
    // 2015-07-22, da Module ausgelassen wurden.
-			// bspw. $context == 'mod_articles_categorytraditionalghsvs.content'
 			$txtKey = !empty($article->text) ? 'text' : (!empty($article->introtext) ? 'introtext' : '');
 			$clearPlaceholder = $this->params->get('clear_plugin_placeholders', 1);
 			$clearImages = $this->params->get('clear_images', 1);
