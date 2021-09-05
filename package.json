@@ -2,8 +2,8 @@
 	"name": "plg_system_articlesubtitleghsvs",
 	"nameReal": "plg_system_articlesubtitleghsvs",
 	"filename": "articlesubtitleghsvs",
-	"version": "2021.09.03",
-	"versionCompare": "2015.07.07",
+	"version": "2021.09.05",
+	"versionCompare": "2021.09.03",
 	"update": {
 		"type": "plugin",
 		"folder": "system",
@@ -23,7 +23,8 @@
 		"lastTests": [
 			"PHP 8",
 			"PHP 7.4",
-			"Joomla 3.10"
+			"Joomla 3.10",
+			"Joomla 4.0"
 		]
 	},
 	"minimumPhp": "7.2.0",
@@ -65,7 +66,7 @@
 		"g-ncu-override-json": "ncu -u"
 	},
 	"dependencies": {
-		"npm-check-updates": "^11.8.4"
+		"npm-check-updates": "^11.8.5"
 	},
 	"devDependencies": {
 		"adm-zip": "0.5.5",
