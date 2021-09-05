@@ -41,12 +41,25 @@
 		<folder>language</folder>
 		<folder>layouts-to-copy-to-admin-template</folder>
 		<folder>myforms</folder>
+		<folder>sql</folder>
 		<folder>test</folder>
 		<folder>tmpl</folder>
 		<filename>installerScript.php</filename>
 		<filename>LICENSE.txt</filename>
 		<filename>resize.php</filename>
 	</files>
+
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/mysql/autorbeschreibungghsvs_content_map.sql</file>
+		</sql>
+	</install>
+
+	<!--<uninstall>
+			<sql>
+					<file driver="mysql" charset="utf8">sql/example.uninstall.sql</file>
+			</sql>
+	</uninstall>-->
 
 	<config>
 		<fields name="params" addfieldpath="/plugins/{{folder}}/{{filename}}/fields/">
