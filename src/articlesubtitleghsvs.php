@@ -68,7 +68,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		 $lang->load('com_content');
 		}
 
-		$this->MapTable = $this->db->qn($this->MapTable);
 		$this->templates = $this->params->get('load_in_templates', array(), 'ARRAY');
 
 		// Bildoptimierer, -Resizer aktiv?
@@ -866,23 +865,11 @@ instance of Jreistry.
 	{
 		// Alte Einträge des $article löschen, auch damit ggf. aufgefrischtes INSERT möglich.
 		$query = $this->db->getQuery(true)
-		->delete($this->MapTable)
+		->delete($this->db->qn($this->MapTable))
 		->where($this->db->qn('content_id') . ' = ' . (int)$article->id);
 		$this->db->setQuery($query);
 		$this->db->execute();
 	} # deleteAutoraliase
-
- protected function createMapTable()
-	{
-		$sql = 'CREATE TABLE IF NOT EXISTS '.$this->MapTable.' (
- `content_id` int(11) unsigned NOT NULL,
- `contact_id` varchar(12) NOT NULL,
-  UNIQUE KEY `ContentContactId` (`content_id`,`contact_id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-  COMMENT=\'Plugin articlesubtitleghsvs. Siehe Autoraliase in Kontaktkategorie by GHSVS\';';
-		$this->db->setQuery($sql);
-		$this->db->execute();
-	} # createMapTable
 
 	/*
 	Zusätzlich zu autorenaliase (Autorbeschreubung) in $article->attribs
@@ -899,7 +886,6 @@ instance of Jreistry.
 			return true;
 		}
 
-		self::createMapTable();
 		self::deleteAutoraliase($article);
 
 		// Neue aus $article->attribs
@@ -907,7 +893,7 @@ instance of Jreistry.
 		$Paras->loadString($article->attribs);
 		$autorenaliasIds = $Paras->get('autorenaliase');
 		$query = $this->db->getQuery(true)
-		->insert($this->MapTable)
+		->insert($this->db->qn($this->MapTable))
 		->columns(
 		 array(
 			$this->db->qn('content_id'),
