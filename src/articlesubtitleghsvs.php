@@ -473,7 +473,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 	} # onContentBeforeDisplay
 
-	/**
+	/*
 	$this->item->event->afterDisplayContent;
 	Zitierweise-Text, Autorbeschreibung-Text
 	*/
@@ -509,7 +509,8 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			}
 		}
 	} # onContentAfterDisplay
-	/**
+
+	/*
 	2015-07-19
 	Bspw. für Blogansichten des Moduls mod_articles_categoryghsvs.
 	Dort sollte onContentPrepare wegen anderer Plugins nicht aufgerufen werden.
@@ -519,7 +520,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		self::onContentPrepare($context, $article, $params, $page);
 	}
 
-	/**
+	/*
 	 Achtung! Hier werden auch com_tags durchgeleitet, da dieses Scheiß Joomla in
 		Version 3.3.6 bspw das core_params nicht ausliest.
 		ToDo: Ab 3.4.2 sollte das Problem gelöst sein.
