@@ -18,14 +18,6 @@
 				description="TERMINENDGHSVS_DESC"
 				format="%Y-%m-%d" size="10" maxlength="10" />
 
-			<field type="spacer" name="hypearticle_ghsvsspacer"
-			 label="HYPEARTICLEGHSVS_DESC" />
-			<field name="hypearticle_ghsvs" type="list" default="0"
-				label="HYPEARTICLEGHSVS_LBL"
-				description="">
-				<option value="1">JYES</option>
-				<option value="0">JNO</option>
-			</field>
 </fieldset>
 
 		<fieldset name="autorbeschreibung">
