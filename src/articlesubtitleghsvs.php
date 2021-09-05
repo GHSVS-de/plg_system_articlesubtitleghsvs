@@ -13,9 +13,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	// Eine Paranoia-Sicherungstabelle für Autorenaliase. Falls Plugin mal versehentlich deaktiviert wurde.
 	protected $MapTable = '#__autorbeschreibungghsvs_content_map';
 
-	// Per Häkchen gehypte Artikel.
-	protected $HypedTable = '#__hypedghsvs';
-
 	// Sozusagen globales ON/OFF für Frontend-Artikel
 	protected $ContinueFE = true;
 
@@ -72,11 +69,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 
 		$this->MapTable = $this->db->qn($this->MapTable);
-		$this->HypedTable = $this->db->qn($this->HypedTable);
-
-		// 2015-08-02: In Constructor verschoben wegen Backend-Fehlern (s.u.).
-		self::createHypedTable();
-
 		$this->templates = $this->params->get('load_in_templates', array(), 'ARRAY');
 
 		// Bildoptimierer, -Resizer aktiv?
@@ -674,10 +666,8 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			//	Liefert $item->AutorenNames und $item->AutorenNamesConcated und $item->AutorenAliase
 			TplHelpGhsvs::getAutorenNamesFromContactAliase($article);
-
 			// Liefert $Item->combinedCatsGhsvs
 			TplHelpGhsvs::combineCats($article);
-
 			//	Liefert $item->concatedTagsGhsvs
 			TplHelpGhsvs::setTagsNamesToItem($article);
 
@@ -719,12 +709,10 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			$article->articlesubtitle1 = trim($article->params->get('articlesubtitle1', '', 'STRING'));
 		}
-		if (!isset($article->hypeghsvs))
-		{
-			$article->hypearticle_ghsvs = (int)$article->params->get('hypearticle_ghsvs', 0);
-		}
+
 		// Bspw. für Bildoptimierer
 		$article->Images = new JRegistry;
+
 		if (!empty($article->images))
 		{
 			$article->Images->loadString($article->images);
@@ -908,16 +896,6 @@ instance of Jreistry.
 		$this->db->execute();
 	} # deleteAutoraliase
 
- protected function deleteHyped($article)
-	{
-		// Alte Einträge des $article löschen, auch damit ggf. aufgefrischtes INSERT möglich.
-		$query = $this->db->getQuery(true)
-		->delete($this->HypedTable)
-		->where($this->db->qn('content_id') . ' = ' . (int)$article->id);
-		$this->db->setQuery($query);
-		$this->db->execute();
-	} # deleteHyped
-
  protected function createMapTable()
 	{
 		$sql = 'CREATE TABLE IF NOT EXISTS '.$this->MapTable.' (
@@ -929,17 +907,6 @@ instance of Jreistry.
 		$this->db->setQuery($sql);
 		$this->db->execute();
 	} # createMapTable
-
- protected function createHypedTable()
-	{
-		$sql = 'CREATE TABLE IF NOT EXISTS '.$this->HypedTable.' (
- `content_id` int(11) unsigned NOT NULL DEFAULT \'0\',
-  UNIQUE KEY `content_id` (`content_id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-  COMMENT=\'Plugin articlesubtitleghsvs\';';
-		$this->db->setQuery($sql);
-		$this->db->execute();
-	} # createHypedTable
 
 	/*
 	Zusätzlich zu autorenaliase (Autorbeschreubung) in $article->attribs
@@ -955,28 +922,20 @@ instance of Jreistry.
 		){
 			return true;
 		}
+
 		self::createMapTable();
-
-		// 2015-08-02. Da auch in einem Backend-Template-Override verwendet,
-		// musste das in Constructor für den Fall, dass Tabelle noch nicht
-		// existiert.
-		//self::createHypedTable();
-
 		self::deleteAutoraliase($article);
-  self::deleteHyped($article);
 
 		// Neue aus $article->attribs
-  $Paras = new JRegistry();
+		$Paras = new JRegistry();
 		$Paras->loadString($article->attribs);
 		$autorenaliasIds = $Paras->get('autorenaliase');
-		$hyped = $Paras->get('hypearticle_ghsvs', 0);
-
 		$query = $this->db->getQuery(true)
 		->insert($this->MapTable)
 		->columns(
 		 array(
-			 $this->db->qn('content_id'),
-				$this->db->qn('contact_id')
+			$this->db->qn('content_id'),
+			$this->db->qn('contact_id')
 			)
 		);
 		foreach ($autorenaliasIds as $id)
@@ -986,25 +945,9 @@ instance of Jreistry.
 			);
 		}
 		$this->db->setQuery($query);
-  $this->db->execute();
+		$this->db->execute();
 
-		if ($hyped)
-		{
-			$query = $this->db->getQuery(true)
-			->insert($this->HypedTable)
-			->columns(
-				array(
-					$this->db->qn('content_id')
-				)
-			)
-			->values(
-			 (int)$article->id
-			);
-		 $this->db->setQuery($query);
-   $this->db->execute();
-		}
-
-  return true;
+		return true;
 	} # onContentAfterSave
 
 	/*
