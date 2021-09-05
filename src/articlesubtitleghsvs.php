@@ -108,18 +108,17 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 	}
 
- /*
+	/*
 	checkt, ob Autorbeschreibungen, Danke, Zitierweise abgewickelt werden sollen in Einzelbeitrag. => $this->ContinueFE
 	2015-01-24: Checkt zusätzlich, ob Kategorieanssicht mit Beiträgen (Blog, Featured, Tag). => $this->ContinueFECat
 	Eigentlich wollte ich nur nicht in jeder Methode diese Option-View-Abfrage.
 	*/
- protected function getContinueFE($context, $article)
+	protected function getContinueFE($context, $article)
 	{
-
 		// Ist aktuelles Template eines von denen, die im Plugin gewählt wurden?
 		// Wenn nicht, dann ENDE.
 		if (
-		 count($this->templates) &&
+			count($this->templates) &&
 			!in_array(JFactory::getApplication()->getTemplate(), $this->templates)
 		)
 		{
@@ -416,8 +415,9 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	/*
 	$this->item->event->beforeDisplayContent;
 	Zitierweise-, Autorbeschreibung- Hüpflinks
+	Termine
 	*/
- public function onContentBeforeDisplay($context, &$article, &$params, $limitstart = 0)
+	public function onContentBeforeDisplay($context, &$article, &$params, $limitstart = 0)
 	{
 		$html = '';
 
@@ -428,11 +428,11 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			if ($this->zitierweise_active)
 			{
-			 $html .= '<a class="a2bottom" href="#zitierweise">Verpflichtende Zitierweise/Urherberrecht <span class="icon-arrow-down-2"></span></a> ';
+				$html .= '<a class="a2bottom" href="#zitierweise">Verpflichtende Zitierweise/Urherberrecht <span class="icon-arrow-down-2"></span></a> ';
 			}
 			if ($this->autorbeschreibung_active)
 			{
-			 $html .= '<a class="a2bottom" href="#autorbeschr">Autorbeschreibung  <span class="icon-arrow-down-2"></span></a> ';
+				$html .= '<a class="a2bottom" href="#autorbeschr">Autorbeschreibung  <span class="icon-arrow-down-2"></span></a> ';
 			}
 			if ($html)
 			{
@@ -446,21 +446,24 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 		// Nachladen com_content-Daten. Wird nur in com_tags ausgeführt, wo attribs nachgeladen werdn müssen.
 		// Todo: das müsste jetzt auch mit ->params gehen.
-  self::completeTagItem($article, $context);
+		self::completeTagItem($article, $context);
 
 		if (!empty($article->attribs))
 		{
 			$Paras = new JRegistry();
 			$Paras->loadString($article->attribs);
-   if ($start = $Paras->get('terminStartGhsvs'))
+
+			if ($start = $Paras->get('terminStartGhsvs'))
 			{
 				$dates .= JFactory::getDate($start)->format(JText::_('DATE_FORMAT_LC4'));
 			}
-   if ($end = $Paras->get('terminEndGhsvs'))
+
+			if ($end = $Paras->get('terminEndGhsvs'))
 			{
 				$dates .= ' bis '.JFactory::getDate($end)->format(JText::_('DATE_FORMAT_LC4'));
 			}
-   if ($dates)
+
+			if ($dates)
 			{
 				$html .= '<p class="terminVonBis">'.JText::_('GHSVS_DATUM').$dates.'</p>';
 			}
