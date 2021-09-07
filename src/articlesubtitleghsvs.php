@@ -353,9 +353,12 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	*/
 	public function onContentBeforeDisplay($context, &$article, &$params, $limitstart = 0)
 	{
+		if (!empty($article->id))
+		{
 		// Termine eingegeben?
 		return trim(LayoutHelper::render('ghsvs.termin',
 				['articleId' => $article->id]));
+		}
 	}
 
 	/*
