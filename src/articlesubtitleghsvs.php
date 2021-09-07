@@ -3,6 +3,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Layout\LayoutHelper;
 
 class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 {
@@ -10,8 +11,11 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	protected $db;
 	protected $autoloadLanguage = true;
 
-	// Eine Paranoia-Sicherungstabelle für Autorenaliase. Falls Plugin mal versehentlich deaktiviert wurde.
+		// Eine Paranoia-Sicherungstabelle für Autorenaliase. Falls Plugin mal versehentlich deaktiviert wurde.
 	protected $MapTable = '#__autorbeschreibungghsvs_content_map';
+
+	// Im Beitrag gewählte Autoren (ids) aus Kontaktkomponente.
+	public $autorenaliase = false;
 
 	// Sozusagen globales ON/OFF für Frontend-Artikel
 	protected $ContinueFE = true;
@@ -19,26 +23,12 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	// Sozusagen globales ON/OFF für Frontend-Artikel-Kategorien und -Hauptbeiträge.
 	protected $ContinueFECat = true;
 
-	// Im Beitrag gewählte Autoren (ids) aus Kontaktkomponente.
-	protected $autorenaliase = false;
-
-	// Objectlist mit allen AutorenDaten:
-	protected $autoren = array();
-
-	// Finden in /tmpl/ Anwendung.
-	protected $Link;
-	protected $Datum;
-	protected $Titel;
-	// Array mit nur AutorenNamen.
-	protected $AutorenNames = array();
-
 	// Switches. Siehe auch Plugin- sowie Beitrags-Einstellungen.
-	protected $zitierweise_active;
-	protected $autorbeschreibung_active;
-	protected $danke_active;
+	public $zitierweise_active;
+	public $autorbeschreibung_active;
 
 	// Lediglich, um nicht in allen Methoden wieder Defaultwerte für xyz_active neu eingeben zu müssen.
-	protected $activeChecks = array();
+	protected $activeChecks = [];
 
 	// In welchen Templates Plugin verwenden? Siehe Plugineinstellung.
 	protected $templates;
@@ -48,8 +38,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 	// new Optimiererklasse.
 	protected $resizer = false;
-
-	//
 	protected $isBlogGhsvsListe = false;
 
 	// Damit Templatehelper-Ladewarnung nur 1x angezeigt wird:
@@ -64,8 +52,8 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// 2015-04-24: Versteh nicht ganz. Vermutlich habe ich COM_CONTENT-Sprachplatzhalter irgendwo?
 		if ($this->app->isClient('administrator'))
 		{
-		 $lang = JFactory::getLanguage();
-		 $lang->load('com_content');
+			$lang = JFactory::getLanguage();
+			$lang->load('com_content');
 		}
 
 		$this->templates = $this->params->get('load_in_templates', array(), 'ARRAY');
@@ -74,7 +62,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		$this->imageoptimizer = $this->params->get('imageoptimizer', 0, 'INT');
 	}
 
- protected function TplHelpGhsvsLoader()
+	protected function TplHelpGhsvsLoader()
 	{
 		if (
 		 !self::$TEMPLATEHELPERMESSAGESENT &&
@@ -109,7 +97,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	}
 
 	/*
-	checkt, ob Autorbeschreibungen, Danke, Zitierweise abgewickelt werden sollen in Einzelbeitrag. => $this->ContinueFE
+	checkt, ob Autorbeschreibungen, Zitierweise abgewickelt werden sollen in Einzelbeitrag. => $this->ContinueFE
 	2015-01-24: Checkt zusätzlich, ob Kategorieanssicht mit Beiträgen (Blog, Featured, Tag). => $this->ContinueFECat
 	Eigentlich wollte ich nur nicht in jeder Methode diese Option-View-Abfrage.
 	*/
@@ -128,11 +116,11 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 		// Erst mal Defaultwerte setzen. Sowohl im Plugin als auch Beitrag kann das überschrieben werden.
 		// Im Plugin muss auf JA stehen, damit per Beitrag überschrieben werden kann!
-		$this->activeChecks = array(
-		 'zitierweise_active' => 1,
+		$this->activeChecks = [
+			'zitierweise_active' => 1,
 			'autorbeschreibung_active' => 1,
-			'danke_active' => 1
-		);
+		];
+
 		// Ergibt z.B. $this->zitierweise_active. Falls Plugin nicht gespeichert wurde, obige Default-Werte nehmen.
 		foreach ($this->activeChecks as $key => $default)
 		{
@@ -164,22 +152,13 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 
 		// Article-View?
-		if (
-		 $this->app->isClient('site') &&
-			in_array($context, $allowed_context) &&
-			$option == 'com_content' &&
-			$view == 'article' &&
-			$this->ContinueFE &&
-			// Da auch einzelne Fragmente über content.prepare laufen können, bspw. per JHtml.
-   isset($article->params) &&
-			$article->params instanceof JRegistry
+		if ($this->app->isClient('site') && in_array($context, $allowed_context)
+			&& $option == 'com_content' && $view == 'article' && $this->ContinueFE
+			&& isset($article->params) && $article->params instanceof JRegistry
 		){
 			$this->ContinueFE = true;
 			$this->ContinueFECat = false;
-
 			self::mergeAttribsToParams($article);
-
-			if(!class_exists('JFile'))jimport('joomla.filesystem.file');
 
 			// Im Beitrag gewählte Autoren aus Kontaktkomponente.
 			$this->autorenaliase = $article->params->get('autorenaliase', false);
@@ -194,30 +173,30 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 				}
 			}
 
-			// Wenn im Beitrag keine Autorenaliase gewählt, kann es auch keine Beschreibung oder Danke zu Autoren geben.
+			// Wenn im Beitrag keine Autorenaliase gewählt, kann es auch keine Beschreibung zu Autoren geben.
 			if (!is_array($this->autorenaliase) || !count($this->autorenaliase))
 			{
 				$this->autorenaliase = false;
-			 $this->autorbeschreibung_active = false;
-				$this->danke_active = false;
+				$this->autorbeschreibung_active = false;
 			}
 
 			// Wir haben Autorenaliase-IDs im Beitrag gefunden.
 			else
 			{
-				ArrayHelper::toInteger($this->autorenaliase);
-    $query = $this->db->getQuery(true);
+				$this->autorenaliase = ArrayHelper::toInteger($this->autorenaliase);
+		    $query = $this->db->getQuery(true);
 
 				// Datenbankabfrage der Autorenkategorie in der Kontaktkopmonente. Diese wird im Plugin gewählt.
 
 				// Erzeugt gequotetes Array, was ebenfalls in select(...) verwendet werden kann:
-				$select = $this->db->qn(array('id', 'name', 'alias', 'misc', 'webpage', 'image'));
+				$select = $this->db->qn(['id', 'name', 'alias', 'misc', 'webpage', 'image']);
 
 				$query->select($select)
 				->from($this->db->qn('#__contact_details'))
-				->where('`id` IN ('.implode(',', $this->autorenaliase).')')
+				->where('`id` IN (' . implode(',', $this->autorenaliase) . ')')
 				->where('`published` >= 1')
-				->where('`catid` = '.$this->params->get('contact_category_autorbeschreibung', -99999, 'INT'));
+				->where('`catid` = '
+					. $this->params->get('contact_category_autorbeschreibung', -99999, 'INT'));
 				$this->db->setQuery($query);
 				$this->autorenaliase = $this->db->loadObjectList();
 
@@ -230,18 +209,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 						$this->$key = false;
 					}
 				}
-				// Autoren gefunden.
-				else
-				{
-					// Array mit nur AutorenNamen.
-					$this->AutorenNames = ArrayHelper::getColumn($this->autorenaliase, 'name');
-				}
 			}
-
-			// Finden in /tmpl/ Anwendung.
-			$this->Link = JFactory::getDocument()->getBase();
-   $this->Titel = $article->title;
-			$this->Datum = gmdate('Y', strtotime($article->created));
 		}
 
 		// Kategorie/Hauptbeiträge-View?
@@ -324,56 +292,39 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 	}
 
-	// Falls man im Plugin JModuleHelper ausschließlich eigene Module unterjubeln möchte.
-	// Es wird von JModuleHelper aber anschließend geprüft, ob die Parameter eine
-	// Anzeige auf aktueller Seite zulassen.
-	public function onPrepareModuleList($modules){
-	}
-	// Das Ergebnis ALLER Module, die entweder durch onPrepareModuleList
-	// oder JModuleHelper::getModuleList gefunden wurden.
-	// Diese wurden noch nicht auf Tauglichkeit geprüft.
-	public function onAfterModuleList($modules){
-	}
-	// Falls man dann im Plugin die letztendlich aktiven Module haben möchte
-	// und für JModuleHelper manipulieren möchte.
-	public function onAfterCleanModuleList($modules){
-	}
- public function onContentPrepareForm($form, $data){
+	public function onContentPrepareForm($form, $data)
+	{
 		$view = $this->app->input->get('view', '');
 		$layout = $this->app->input->get('layout', '');
+		$allowedContext = array(
+			'com_content.article',
+		);
 
-  $allowedContext = array(
-   'com_content.article',
-  );
+		if(!in_array($form->getName(), $allowedContext))
+		{
+			return true;
+		}
 
-  if(
-		 // Auch Editing im FE möglich. Deshalb raus:
-   # !$this->app->isClient('administrator') ||
-   !in_array($form->getName(), $allowedContext)
-  ){
-   return true;
-  }
-
-  $this->ContinueFE = false;
+		$this->ContinueFE = false;
 		$this->ContinueFECat = false;
 
 		// 2015-04-24: Nicht ganz klar, warum ich eigentlich aufrufe.
 		self::getContinueFE('none', null);
 
-  // Pfad zu plugineigenen XML-Dateien, die article.xml ergänzen.
-  JForm::addFormPath(__DIR__.'/myforms');
-
+		// Pfad zu plugineigenen XML-Dateien, die article.xml ergänzen.
+		JForm::addFormPath(__DIR__ . '/myforms');
 
 		// Erzwinge Metabeschreibung:
 		$form->setFieldAttribute('metadesc', 'required', 'true');
 
-  //loads /pluginpath/myforms/articlesubtitle.xml
-  $form->loadFile('articlesubtitle', $reset=false, $path=false);
+		//loads /pluginpath/myforms/articlesubtitle.xml
+		$form->loadFile('articlesubtitle', $reset = false, $path = false);
 
 		// Wird im FE NICHT angezeigt, aber auch nicht versehentlich überschrieben/gelöscht.
 		// Also auf nicht required, damit beim Speichern nicht blockiert.
-		if ($this->app->isClient('site')){
-		 $form->setFieldAttribute('autorenaliase', 'required', 'false', 'attribs');
+		if ($this->app->isClient('site'))
+		{
+			$form->setFieldAttribute('autorenaliase', 'required', 'false', 'attribs');
 		}
 
 		// Wenn im Plugin deaktiviert, im Beitrag das Feld auf readonly + Hinweis im Label!
@@ -393,124 +344,38 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		 }
 		}
 
-
-  return true;
- } # onContentPrepareForm
-
-
-	/*
-	onContentAfterTitle
-	return-String wird in einer $item-Property hinterlegt, je nach view.html.php.
-	$item->event->afterDisplayTitle
-	Crux:
-	Wird bspw. in artcicle-default-view nur angezeigt,
-	 wenn KEIN Introtext angezeigt wird. Die Logik dahinter bleibt verborgen.
-	 Wahrscheinlich nur eines dieser "privaten Features" in Joomla.
-	*/
- public function onContentAfterTitle($context, &$article, &$params, $limitstart = 0)
-	{
-		#return 'Ich bin ein String für $item->event->afterDisplayTitle';exit;
-	}
+		return true;
+	} # onContentPrepareForm
 
 	/*
 	$this->item->event->beforeDisplayContent;
-	Zitierweise-, Autorbeschreibung- Hüpflinks
 	Termine
 	*/
 	public function onContentBeforeDisplay($context, &$article, &$params, $limitstart = 0)
 	{
-		$html = '';
-
-		// Autorbeschreibung, Danke, Zitierweise abzuwickeln?
-		self::getContinueFE($context, $article);
-
-		if ($this->ContinueFE)
-		{
-			if ($this->zitierweise_active)
-			{
-				$html .= '<a class="a2bottom" href="#zitierweise">Verpflichtende Zitierweise/Urherberrecht <span class="icon-arrow-down-2"></span></a> ';
-			}
-			if ($this->autorbeschreibung_active)
-			{
-				$html .= '<a class="a2bottom" href="#autorbeschr">Autorbeschreibung  <span class="icon-arrow-down-2"></span></a> ';
-			}
-			if ($html)
-			{
-				$html = '<p class="huepfdownLink">'.$html.'</p>';
-			}
-		}
-
-		// START-END-TERMINE?
-
-		$dates = '';
-
-		// Nachladen com_content-Daten. Wird nur in com_tags ausgeführt, wo attribs nachgeladen werdn müssen.
-		// Todo: das müsste jetzt auch mit ->params gehen.
-		self::completeTagItem($article, $context);
-
-		if (!empty($article->attribs))
-		{
-			$Paras = new JRegistry();
-			$Paras->loadString($article->attribs);
-
-			if ($start = $Paras->get('terminStartGhsvs'))
-			{
-				$dates .= JFactory::getDate($start)->format(JText::_('DATE_FORMAT_LC4'));
-			}
-
-			if ($end = $Paras->get('terminEndGhsvs'))
-			{
-				$dates .= ' bis '.JFactory::getDate($end)->format(JText::_('DATE_FORMAT_LC4'));
-			}
-
-			if ($dates)
-			{
-				$html .= '<p class="terminVonBis">'.JText::_('GHSVS_DATUM').$dates.'</p>';
-			}
-		}
-
-		if ($html)
-		{
-			return $html;
-		}
-	} # onContentBeforeDisplay
+		// Termine eingegeben?
+		return trim(LayoutHelper::render('ghsvs.termin',
+				['articleId' => $article->id]));
+	}
 
 	/*
 	$this->item->event->afterDisplayContent;
 	Zitierweise-Text, Autorbeschreibung-Text
 	*/
- public function onContentAfterDisplay($context, &$article, &$params, $limitstart = 0)
+	public function onContentAfterDisplay($context, &$article, &$params, $limitstart = 0)
 	{
 		self::getContinueFE($context, $article);
+
 		if ($this->ContinueFE)
 		{
-		 $html = '';
-   $Autoren = implode(', ', $this->AutorenNames);
-
-			if ($this->autorbeschreibung_active)
-			{
-				$layout = $this->params->get('layout_autorbeschreibung', 'autorbeschreibung');
-				$path = JPluginHelper::getLayoutPath($this->_type, $this->_name, $layout);
-				ob_start();
-				include $path;
-				$html .= ob_get_clean();
-			}
-			if ($this->zitierweise_active)
-			{
-				$layout = $this->params->get('layout_zitierweise', 'zitierweise');
-				$path = JPluginHelper::getLayoutPath($this->_type, $this->_name, $layout);
-				ob_start();
-				include $path;
-				$html .= ob_get_clean();
-			}
-
-			if ($html)
-			{
-				$html = '<div class="div4zitierNautor">'.$html.'</div>';
-				return $html;
-			}
+			return trim(LayoutHelper::render('ghsvs.autorbeschreibung',
+				[
+					'pluginThis' => $this,
+					'article' => $article
+				]
+			));
 		}
-	} # onContentAfterDisplay
+	}
 
 	/*
 	 Achtung! Hier werden auch com_tags durchgeleitet, da dieses Scheiß Joomla in
@@ -530,9 +395,8 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			// Plumpe Variante. Zu prüfen, ob ausreichend:
 			$article->TypeAliasGhsvs = $context;
-			$toArticle = array(
-			'com_content.featured', 'com_content.category'
-			);
+			$toArticle = ['com_content.featured', 'com_content.category'];
+
 			if (in_array($article->TypeAliasGhsvs, $toArticle))
 			{
 				$article->TypeAliasGhsvs = 'com_content.article';
@@ -543,10 +407,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		com_tags, einzelnes ContentItem darin
 		Achtung! Lässt ALLE type_alias durch, also auch com_content.category
 		*/
-		if (
-		 $context == 'com_tags.tag' &&
-			!empty($article->content_item_id)
-		)
+		if ($context == 'com_tags.tag' && !empty($article->content_item_id))
 		{
 			self::completeTagItem($article, $context);
 			self::getItemAdditionals($article);
@@ -555,24 +416,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 		self::getContinueFE($context, $article);
 
-		if ($this->ContinueFE)
-		{
-		 $html = '';
-			if ($this->danke_active)
-			{
-				$layout = $this->params->get('layout_autorbeschreibung', 'danke');
-				$path = JPluginHelper::getLayoutPath($this->_type, $this->_name, $layout);
-				ob_start();
-				include $path;
-				$html .= ob_get_clean();
-			}
-			$article->text .= $html;
-		}
-
-		if (
-		 $this->ContinueFE
-			|| ($this->ContinueFECat)
-		)
+		if ($this->ContinueFE || ($this->ContinueFECat))
 		{
 			// Entfernt ggf. auch normale Bilder (aber nicht Einleitungsbild, nicht Beitragsbild).
 			self::getItemAdditionals($article, $context);
@@ -581,7 +425,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// BILDOPTIMIERER
 		if ($this->imageoptimizer)
 		{
-
 			// In Blog, Hauptbeiträge sind nur Einleitungsbilder relevant, falls normale Bilder
 			// entfernt wurden. Siehe clean_images.
 		 if (
@@ -632,15 +475,15 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 				$article->Images->set('image_fulltext', $image_full);
 				$article->images = $article->Images->toString();
 			}
-
-
-
 		} # imageoptimizer
-  return true;
+
+		return true;
 	}
 
-	protected function getItemAdditionals(&$article, $context = ''){
+	protected function getItemAdditionals(&$article, $context = '')
+	{
 		self::TplHelpGhsvsLoader();
+
 		if (self::$TMPLHELPERLOADED)
 		{
 			//	Liefert $item->AutorenNames und $item->AutorenNamesConcated und $item->AutorenAliase
@@ -682,10 +525,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 					TplHelpGhsvs::ClearIMGTag($article->$txtKey);
 				}
 			}
-		}
-		if (!isset($article->articlesubtitle1))
-		{
-			$article->articlesubtitle1 = trim($article->params->get('articlesubtitle1', '', 'STRING'));
 		}
 
 		// Bspw. für Bildoptimierer

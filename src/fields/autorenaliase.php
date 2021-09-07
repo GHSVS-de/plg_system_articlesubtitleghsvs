@@ -1,7 +1,7 @@
 <?php
-/**
+/*
 Stellt ein Formularfeld mit Kontakteinträgen (com_contact) bereit.
-Für Plugin autorbeschreibungghsvs, dass die Zitierweise und Danke unter Beiträgen anzeigt.
+Für Plugin autorbeschreibungghsvs, dass die Zitierweise unter Beiträgen anzeigt.
 
 <option value="plattee">plattee-Dr. Editha Platte</option>
 

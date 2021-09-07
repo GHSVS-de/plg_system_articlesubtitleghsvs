@@ -68,7 +68,7 @@
 				<field name="imageoptimizer" type="radio" default="0"
 				 class="btn-group"
 					label="Bildoptimierer aktiv"
-					description="">
+					>
 					<option value="0">JNO</option>
      <option value="1">JYES</option>
 				</field>
@@ -76,12 +76,12 @@
 				<field name="image_intro_size" type="text"
 					default="w=360,quality=60,maxOnly=TRUE"
 					label="COM_CONTENT_FIELD_INTRO_LABEL"
-					description="" />
+					 />
 
 				<field name="image_full_size" type="text"
 					default="w=550,quality=70,maxOnly=TRUE"
 					label="COM_CONTENT_FIELD_FULL_LABEL"
-					description="" />
+					 />
 
 				<field name="cache_folder" type="text"
 					default="cache"
@@ -90,23 +90,23 @@
 
 				<field name="test_imagick_exec"
 					label="PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKEXEC_LABEL"
-					description=""
+
 					type="testimagick" />
 
 				<field name="test_imagick_class"
 					label="PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKCLASS_LABEL"
-					description=""
+
 					type="testimagick" />
 
 				<field name="test_imagick_jimage"
 					label="PLG_IMGRESIZECACHE_FIELD_TESTJIMAGE_LABEL"
-					description=""
+
 					type="testimagick" />
 
 				<field name="imagick_process" type="list"
 					default="class"
 					label="PLG_IMGRESIZECACHE_FIELD_IMAGICKPROCESS_LABEL"
-					description="">
+					>
 					<option value="exec">PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKEXEC_LABEL</option>
 					<option value="class">PLG_IMGRESIZECACHE_FIELD_TESTIMAGICKCLASS_LABEL</option>
 					<option value="jimage">PLG_IMGRESIZECACHE_FIELD_TESTJIMAGE_LABEL</option>
@@ -147,17 +147,23 @@
 					<option value="0">JNO</option>
      <option value="1">JYES</option>
 				</field>
+
+			<field name="contact_category_autorbeschreibungSpacer" type="note"
+				class="alert alert-info"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_CONTACT_CATEGORY"
+				description="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_CONTACT_CATEGORY_DESC"/>
+
 				<field name="contact_category_autorbeschreibung" type="category" default=""
 				 extension="com_contact"
 					required="true"
-					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_CONTACT_CATEGORY_LBL"
-					description="">
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_CONTACT_CATEGORY"
+					>
 					<option value="">---Select a contact category---</option>
 				</field>
 
 				<field name="zitierweise_active" type="list" default="1"
 					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL"
-					description=""
+
 					class="btn-group btn-group-yesno">
 					<option value="1">JYES</option>
 					<option value="0">JNO</option>
@@ -165,15 +171,7 @@
 
 				<field name="autorbeschreibung_active" type="list" default="1"
 					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
-					description=""
-					class="btn-group btn-group-yesno">
-					<option value="1">JYES</option>
-					<option value="0">JNO</option>
-				</field>
 
-				<field name="danke_active" type="list" default="1"
-					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DANKE_ACTIVE_LBL"
-					description=""
 					class="btn-group btn-group-yesno">
 					<option value="1">JYES</option>
 					<option value="0">JNO</option>

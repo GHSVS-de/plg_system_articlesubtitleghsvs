@@ -7,19 +7,6 @@
 		<!--Leider zu spät eingerichtet. Als Kenner für JRegistry-params, dass Plugin-Felder tatsächlich drin. Ansonsten muss attribs gemerged werden. -->
 		<field type="hidden" default="1" name="pluginarticlesubtitleghsvs" />
 
-<fieldset name="termin">
-			<field name="terminStartGhsvs" type="calendar"
-				label="TERMINSTARTGHSVS_LBL"
-				description="TERMINSTARTGHSVS_DESC"
-				format="%Y-%m-%d" size="10" maxlength="10" />
-
-			<field name="terminEndGhsvs" type="calendar"
-				label="TERMINENDGHSVS_LBL"
-				description="TERMINENDGHSVS_DESC"
-				format="%Y-%m-%d" size="10" maxlength="10" />
-
-</fieldset>
-
 		<fieldset name="autorbeschreibung">
 
 			<field name="autorenaliasespacer" type="spacer"
@@ -43,13 +30,6 @@
 
 			<field name="autorbeschreibung_active" type="list" default="1"
 				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
-				description="">
-				<option value="1">JYES</option>
-				<option value="0">JNO</option>
-			</field>
-
-			<field name="danke_active" type="list" default="1"
-				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DANKE_ACTIVE_LBL"
 				description="">
 				<option value="1">JYES</option>
 				<option value="0">JNO</option>
