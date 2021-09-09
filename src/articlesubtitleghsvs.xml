@@ -42,6 +42,7 @@
 		<folder>layouts-to-copy-to-admin-template</folder>
 		<folder>myforms</folder>
 		<folder>sql</folder>
+		<folder>src</folder>
 		<folder>test</folder>
 		<filename>installerScript.php</filename>
 		<filename>LICENSE.txt</filename>
