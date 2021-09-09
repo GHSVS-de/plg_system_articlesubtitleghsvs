@@ -48,6 +48,8 @@
 		<filename>resize.php</filename>
 	</files>
 
+	<namespace path="src">Joomla\Plugin\System\ArticleSubtitleGhsvs</namespace>
+
 	<install>
 		<sql>
 			<file driver="mysql" charset="utf8">sql/mysql/autorbeschreibungghsvs_content_map.sql</file>
@@ -64,8 +66,7 @@
 		<fields name="params" addfieldpath="/plugins/{{folder}}/{{filename}}/fields/">
 
 			<fieldset name="imagesizer">
-				<field name="imageoptimizer" type="radio" default="0"
-				 class="btn-group"
+				<field name="imageoptimizer" type="list" default="0" filter="integer"
 					label="Bildoptimierer aktiv"
 					>
 					<option value="0">JNO</option>
@@ -131,16 +132,15 @@
 					description="Leer = Alle. Das Plugin benötigt Template-Helper TplHelpGhsvs im Templateordner">
 				</field>
 
-				<field name="clear_plugin_placeholders" type="radio" default="1"
-				 class="btn-group"
+				<field name="clear_plugin_placeholders" type="list" default="1"
+					filter="integer"
 					label="Pluginplatzhalter entfernen"
 					description="Entfernt störende Pluginplatzhalter aus (Intro)Texten, bspw. für Galerien. {gallery xaz}">
 					<option value="0">JNO</option>
      <option value="1">JYES</option>
 				</field>
 
-				<field name="clear_images" type="radio" default="1"
-				 class="btn-group"
+				<field name="clear_images" type="list" default="1" filter="integer"
 					label="Bilder entfernen"
 					description="Entfernt Bilder aus (Intro)Texten.">
 					<option value="0">JNO</option>
@@ -161,6 +161,7 @@
 				</field>
 
 				<field name="zitierweise_active" type="list" default="1"
+					filter="integer"
 					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL"
 
 					class="btn-group btn-group-yesno">
@@ -169,9 +170,8 @@
 				</field>
 
 				<field name="autorbeschreibung_active" type="list" default="1"
-					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
-
-					class="btn-group btn-group-yesno">
+					filter="integer"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL">
 					<option value="1">JYES</option>
 					<option value="0">JNO</option>
 				</field>
