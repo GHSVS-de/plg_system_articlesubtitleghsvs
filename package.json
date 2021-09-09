@@ -2,8 +2,8 @@
 	"name": "plg_system_articlesubtitleghsvs",
 	"nameReal": "plg_system_articlesubtitleghsvs",
 	"filename": "articlesubtitleghsvs",
-	"version": "2021.09.09",
-	"versionCompare": "2021.09.07",
+	"version": "2021.09.10",
+	"versionCompare": "2021.09.09",
 	"update": {
 		"type": "plugin",
 		"folder": "system",
