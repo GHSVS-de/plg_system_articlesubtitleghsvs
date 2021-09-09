@@ -282,20 +282,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	}
 
 	/*
-	$this->item->event->beforeDisplayContent;
-	Termine
-	*/
-	public function onContentBeforeDisplay($context, &$article, &$params, $limitstart = 0)
-	{
-		if (!empty($article->id))
-		{
-			// Termine eingegeben?
-			return trim(LayoutHelper::render('ghsvs.termin',
-					['articleId' => $article->id]));
-		}
-	}
-
-	/*
 	$this->item->event->afterDisplayContent;
 	Zitierweise-Text, Autorbeschreibung-Text
 	*/
