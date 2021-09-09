@@ -1,9 +1,23 @@
 <?php
 defined('_JEXEC') or die;
 
+if (version_compare(JVERSION, '4', 'lt'))
+{
+  JLoader::registerNamespace(
+    'Joomla\Plugin\System\ArticleSubtitleGhsvs',
+    __DIR__ . '/src',
+    false, false, 'psr4'
+  );
+}
+
+use Joomla\Plugin\System\ArticleSubtitleGhsvs\Helper\ArticleSubtitleGhsvsHelper;
+
+use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\Registry\Registry;
+use Joomla\CMS\Language\Text;
 
 class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 {
@@ -28,7 +42,10 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	public $autorbeschreibung_active;
 
 	// Lediglich, um nicht in allen Methoden wieder Defaultwerte für xyz_active neu eingeben zu müssen.
-	protected $activeChecks = [];
+	protected $activeChecks = [
+		'zitierweise_active',
+		'autorbeschreibung_active',
+	];
 
 	// In welchen Templates Plugin verwenden? Siehe Plugineinstellung.
 	protected $templates;
@@ -62,40 +79,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		$this->imageoptimizer = $this->params->get('imageoptimizer', 0, 'INT');
 	}
 
-	protected function TplHelpGhsvsLoader()
-	{
-		if (
-		 !self::$TEMPLATEHELPERMESSAGESENT &&
-			!self::$TMPLHELPERLOADED
-		)
-		{
-			$template = JFactory::getApplication()->getTemplate();
-
-			if(
-				!($TplHelpGhsvs = JLoader::import(
-					"templates.$template.html.helpersghsvs.TplHelpGhsvs",
-					JPATH_SITE
-				))
-			){
-				$TplHelpGhsvsError =
-					'Could not load template helper: '.str_replace(
-						'.', '/',
-						"templates.$template.html.helpersghsvs.TplHelpGhsvs"
-					).' in Plugin '.$this->_name;
-				JFactory::getApplication()->enqueueMessage($TplHelpGhsvsError);
-				#throw new RuntimeException($error, 500);
-				self::$TEMPLATEHELPERMESSAGESENT = true;
-				self::$TMPLHELPERLOADED = false;
-				return false;
-			}
-			else
-			{
-			 self::$TMPLHELPERLOADED = true;
-				return true;
-			}
-		}
-	}
-
 	/*
 	checkt, ob Autorbeschreibungen, Zitierweise abgewickelt werden sollen in Einzelbeitrag. => $this->ContinueFE
 	2015-01-24: Checkt zusätzlich, ob Kategorieanssicht mit Beiträgen (Blog, Featured, Tag). => $this->ContinueFECat
@@ -103,44 +86,35 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	*/
 	protected function getContinueFE($context, $article)
 	{
-		// Ist aktuelles Template eines von denen, die im Plugin gewählt wurden?
-		// Wenn nicht, dann ENDE.
 		if (
-			count($this->templates) &&
-			!in_array(JFactory::getApplication()->getTemplate(), $this->templates)
-		)
-		{
+			!$this->app->isClient('site')
+			|| Factory::getDocument()->getType() !== 'html'
+			|| (count($this->templates) &&
+				!in_array($this->app->getTemplate(), $this->templates))
+			|| !(isset($article->params) && $article->params instanceof Registry)
+		){
 			$this->ContinueFE = $this->ContinueFECat = false;
 			return;
 		}
 
-		// Erst mal Defaultwerte setzen. Sowohl im Plugin als auch Beitrag kann das überschrieben werden.
-		// Im Plugin muss auf JA stehen, damit per Beitrag überschrieben werden kann!
-		$this->activeChecks = [
-			'zitierweise_active' => 1,
-			'autorbeschreibung_active' => 1,
-		];
-
-		// Ergibt z.B. $this->zitierweise_active. Falls Plugin nicht gespeichert wurde, obige Default-Werte nehmen.
-		foreach ($this->activeChecks as $key => $default)
-		{
-			$this->$key = $this->params->get($key, $default);
-		}
-
-		$option = $this->app->input->get('option', '', 'cmd');
-		$view = $this->app->input->get('view', '', 'cmd');
+		$option = $this->app->input->get('option');
+		$view = $this->app->input->get('view');
 
 		//z.B. wohnmichl:blogghsvs
-		$layout = $this->app->input->get('layout', '', 'STRING');
+		$layout = $this->app->input->get('layout');
 
-		$this->context = $context;
+		$allowed_context = ['com_content.article'];
+		$allowed_contextCat = ['com_content.category', 'com_content.featured'];
 
-		$allowed_context = array('com_content.article');
-		$allowed_contextCat = array('com_content.category', 'com_content.featured');
-
+		// Article View?
 		if (
-			$view == 'article'
+			$this->ContinueFE === true
+			&& $view === 'article'
+			&& $option === 'com_content'
+			&& in_array($context, $allowed_context)
 		){
+			$this->ContinueFECat = false;
+
 			// Fremde Plugin-Platzhalter in Article-Views NICHT löschen.
 			$this->params->set('clear_plugin_placeholders', 0);
 
@@ -149,100 +123,59 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 			// Hx-Headertags NICHT durch P ersetzen.
 			$this->params->set('replace_hx', 0);
-		}
 
-		// Article-View?
-		if ($this->app->isClient('site') && in_array($context, $allowed_context)
-			&& $option == 'com_content' && $view == 'article' && $this->ContinueFE
-			&& isset($article->params) && $article->params instanceof JRegistry
-		){
-			$this->ContinueFE = true;
-			$this->ContinueFECat = false;
 			self::mergeAttribsToParams($article);
 
-			// Im Beitrag gewählte Autoren aus Kontaktkomponente.
-			$this->autorenaliase = $article->params->get('autorenaliase', false);
+			/* fügt Arrays $article->autorenaliase und $article->AutorenNamesConcated
+				hinzu. */
+			ArticleSubtitleGhsvsHelper::getAutorenNamesFromContactAliase($article,
+				$this->params);
 
-			// Beitragseinstellungen (z.B. zitierweise_active) überschreiben jetzt erst globale Plugineinstellungen.
-			foreach ($this->activeChecks as $key => $default)
+			// Set properties like $article->zitierweise_active.
+			foreach ($this->activeChecks as $key)
 			{
-				// , falls im Plugin JA (= 1) eingestellt:
-				if ($this->$key)
+				$article->$key = 0;
+
+				// If not active in Plugin, no chance for article to override,
+				if ((int) $this->params->get($key, 1) === 1)
 				{
-					$this->$key = $article->params->get($key, $default);
-				}
-			}
+					// Otherweise take over article settings.
+					$article->$key = (int) $article->params->get($key, 1);
 
-			// Wenn im Beitrag keine Autorenaliase gewählt, kann es auch keine Beschreibung zu Autoren geben.
-			if (!is_array($this->autorenaliase) || !count($this->autorenaliase))
-			{
-				$this->autorenaliase = false;
-				$this->autorbeschreibung_active = false;
-			}
-
-			// Wir haben Autorenaliase-IDs im Beitrag gefunden.
-			else
-			{
-				$this->autorenaliase = ArrayHelper::toInteger($this->autorenaliase);
-		    $query = $this->db->getQuery(true);
-
-				// Datenbankabfrage der Autorenkategorie in der Kontaktkopmonente. Diese wird im Plugin gewählt.
-
-				// Erzeugt gequotetes Array, was ebenfalls in select(...) verwendet werden kann:
-				$select = $this->db->qn(['id', 'name', 'alias', 'misc', 'webpage', 'image']);
-
-				$query->select($select)
-				->from($this->db->qn('#__contact_details'))
-				->where('`id` IN (' . implode(',', $this->autorenaliase) . ')')
-				->where('`published` >= 1')
-				->where('`catid` = '
-					. $this->params->get('contact_category_autorbeschreibung', -99999, 'INT'));
-				$this->db->setQuery($query);
-				$this->autorenaliase = $this->db->loadObjectList();
-
-				// Keine Autoren gefunden.
-			 if (!is_array($this->autorenaliase) || !count($this->autorenaliase))
-			 {
-			  // Also nix zu tun bzgl. z.B. zitierweise_active.
-					foreach ($this->activeChecks as $key => $default)
+					if ($key === 'autorbeschreibung_active' && !$article->autorenaliase)
 					{
-						$this->$key = false;
+						$article->$key = 0;
 					}
 				}
 			}
 		}
 
-		// Kategorie/Hauptbeiträge-View?
-		elseif
-		(
-		 $this->app->isClient('site') &&
-			in_array($context, $allowed_contextCat) &&
-			$option == 'com_content' &&
-			in_array($context, $allowed_contextCat) &&
-			$this->ContinueFECat &&
-			// Da auch einzelne Fragmente über content.prepare laufen können, bspw. per JHtml.
-   isset($article->params) &&
-			$article->params instanceof JRegistry
+		// Category/Featured View?
+		elseif (
+			$this->ContinueFECat === true
+			&& $option === 'com_content'
+			&& in_array($context, $allowed_contextCat)
 		){
 			$this->ContinueFE = false;
-			$this->ContinueFECat = true;
 			self::mergeAttribsToParams($article);
 
 			// Sehr unflexible Krücke, um zu ermitteln, ob es sich um ein Listenlayout handelt in meinen eigenen Category-Views mit BLOGLISTTOGGLER-Button. load_in_templates
 			// Geprüft wurde schon, dass wir in featured/category-View sind.
 			// 2015-07-28: Wenigstens schon mal Check über alle aktivierten Templates hinzu.
+			// Hat was mit imageresizer zu tun.
 			foreach ($this->templates as $templ)
 			{
-				if ($layout == $templ.':blogghsvs')
+				if ($layout === $templ . ':blogghsvs')
 				{
 					$chckIsBlogGhsvsListe = true;
 					break;
 				}
 			}
+
 			if (isset($chckIsBlogGhsvsListe))
 			{
 				$node = 'jshopghsvs';
-				$session = JFactory::getSession();
+				$session = Factory::getSession();
 				$sessionData = $session->get($node);
 				// Jetzt die sicherste Variante wählen:
 				if (
@@ -257,7 +190,8 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// Weder Article- noch Cat- oder Featured-View?
 		else
 		{
-			$this->ContinueFE = $this->ContinueFECat = false;
+			$this->ContinueFE = false;
+			$this->ContinueFECat = false;
 		}
 	}
 
@@ -278,14 +212,13 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 
 			// autorenaliase ist einziges Feld, dass ich zur Zeit required habe, da leere Felder beim merge() leider ignoriert werden, also keine Property erzeugt wird, also auch nicht geprüft werden können.
 			if (
-			 // Mittlerweile in XML als hidden nachgetragen
-			 1 !== $article->params->get('pluginarticlesubtitleghsvs', 0, 'INT') ||
+				// Mittlerweile in XML als hidden nachgetragen
+				1 !== $article->params->get('pluginarticlesubtitleghsvs', 0, 'INT')
 				// Für alte Beiträge.
-				!is_array($article->params->get('autorenaliase'))
-			)
+				|| !is_array($article->params->get('autorenaliase')))
 			{
 				// Beitragsattribs.
-				$Attribs = new JRegistry();
+				$Attribs = new Registry();
 				$Attribs->loadString($article->attribs);
 				$article->params->merge($Attribs);
 			}
@@ -320,32 +253,33 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		//loads /pluginpath/myforms/articlesubtitle.xml
 		$form->loadFile('articlesubtitle', $reset = false, $path = false);
 
-		// Wird im FE NICHT angezeigt, aber auch nicht versehentlich überschrieben/gelöscht.
-		// Also auf nicht required, damit beim Speichern nicht blockiert.
+		/* Wird im FE NICHT angezeigt, aber auch nicht versehentlich
+			überschrieben/gelöscht.
+			Also auf nicht required, damit beim Speichern nicht blockiert. */
 		if ($this->app->isClient('site'))
 		{
 			$form->setFieldAttribute('autorenaliase', 'required', 'false', 'attribs');
 		}
 
 		// Wenn im Plugin deaktiviert, im Beitrag das Feld auf readonly + Hinweis im Label!
-		foreach ($this->activeChecks as $key => $notneeded)
+		foreach ($this->activeChecks as $key)
 		{
-		 if (!$this->$key)
-		 {
-		  $form->setFieldAttribute($key, 'readonly', 'true', 'attribs');
-				$oldLabel = JText::_($form->getFieldAttribute(
-				 $key,
+			if (!$this->params->get($key))
+			{
+				$form->setFieldAttribute($key, 'readonly', 'true', 'attribs');
+				$oldLabel = Text::_($form->getFieldAttribute(
+					$key,
 					'label',
-					'PLG_SYSTEM_ARTICLESUBTITLEGHSVS_'.strtoupper($key).'_LBL',
-					'attribs')
-				);
-				$newLabel = $oldLabel.' ('.JText::_('PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DEACTIVATED_BY_PLUGIN').')';
+					'PLG_SYSTEM_ARTICLESUBTITLEGHSVS_' . strtoupper($key) . '_LBL',
+					'attribs'
+				));
+				$newLabel = $oldLabel.' ('
+					. Text::_('PLG_SYSTEM_ARTICLESUBTITLEGHSVS_DEACTIVATED_BY_PLUGIN')
+					. ')';
 				$form->setFieldAttribute($key, 'label', $newLabel, 'attribs');
-		 }
+			}
 		}
-
-		return true;
-	} # onContentPrepareForm
+	}
 
 	/*
 	$this->item->event->beforeDisplayContent;
@@ -355,9 +289,9 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	{
 		if (!empty($article->id))
 		{
-		// Termine eingegeben?
-		return trim(LayoutHelper::render('ghsvs.termin',
-				['articleId' => $article->id]));
+			// Termine eingegeben?
+			return trim(LayoutHelper::render('ghsvs.termin',
+					['articleId' => $article->id]));
 		}
 	}
 
@@ -373,7 +307,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		{
 			return trim(LayoutHelper::render('ghsvs.autorbeschreibung',
 				[
-					'pluginThis' => $this,
 					'article' => $article
 				]
 			));
@@ -385,13 +318,13 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		Version 3.3.6 bspw das core_params nicht ausliest.
 		ToDo: Ab 3.4.2 sollte das Problem gelöst sein.
 	*/
- public function onContentPrepare($context, &$article, $params, $page = 0)
+	public function onContentPrepare($context, &$article, $params, $page = 0)
 	{
 		// Dann sind wir wohl in com_tags.
 		if (!empty($article->type_alias))
 		{
 			// Muss eigene Property TypeAliasGhsvs sein!!!!!
-		 $article->TypeAliasGhsvs = $article->type_alias;
+			$article->TypeAliasGhsvs = $article->type_alias;
 		}
 		// Dann sind wir wohl nicht in com_tags.
 		else
@@ -483,16 +416,24 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		return true;
 	}
 
-	protected function getItemAdditionals(&$article, $context = '')
+	/** Add additional properties to $article.
+	*
+	*
+	*/
+	protected function getItemAdditionals(&$article)
 	{
+		/* fügt Arrays $article->autorenaliase und $article->AutorenNamesConcated
+			hinzu. */
+		ArticleSubtitleGhsvsHelper::getAutorenNamesFromContactAliase($article,
+			$this->params);
+
 		self::TplHelpGhsvsLoader();
 
 		if (self::$TMPLHELPERLOADED)
 		{
-			//	Liefert $item->AutorenNames und $item->AutorenNamesConcated und $item->AutorenAliase
-			TplHelpGhsvs::getAutorenNamesFromContactAliase($article);
 			// Liefert $Item->combinedCatsGhsvs
 			TplHelpGhsvs::combineCats($article);
+
 			//	Liefert $item->concatedTagsGhsvs
 			TplHelpGhsvs::setTagsNamesToItem($article);
 
@@ -531,7 +472,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		}
 
 		// Bspw. für Bildoptimierer
-		$article->Images = new JRegistry;
+		$article->Images = new Registry;
 
 		if (!empty($article->images))
 		{
@@ -545,7 +486,7 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		Version 3.3.6 bspw das core_params nicht ausliest.
 		Nachladen der Daten aus #__content
 Anmerkung dazu und com_tags:
-!!!!core_params muss unbedingt als JRegistry zurückgegeben werden
+!!!!core_params muss unbedingt als Registry zurückgegeben werden
 (wie es auch ankommt, aber da leer.!!!!!!
 Eigentlich wegen eines Bugs in jw_allvideos. Hier landet core_params als $params
 in onContentPrepare. Es wird nur auf leeres params geprüft, aber nicht auf die
@@ -635,7 +576,7 @@ instance of Jreistry.
 		// Muss JsonString bleiben!! Todo:needed anymore?
   $article->attribs = $article->core_params;
 
-		$article->params = new JRegistry();
+		$article->params = new Registry();
 		$article->params->loadString($article->core_params);
 		// Krücke Todo: Im Tag-View-XML Parameter einrichten
 		$article->params->set('ghsvs_combine_categories', 1);
@@ -682,39 +623,34 @@ instance of Jreistry.
 		return true;
 	} # completeTagItem
 
- /*
- Normally only fired in list views, not in edit views.
- */
- public function onContentChangeState($context, $pks, $value)
-	{
-	}
-	public function onContentPrepareData($context, $data){
-	}
-
 	/**
-	 * Attribs-Sicherungen in DB löschen.
-	 */
+	* Attribs-Sicherungen in DB löschen.
+	*/
 	public function onContentAfterDelete($context, $article)
 	{
 		if (
-		 $context != 'com_content.article' ||
-			empty($article->attribs) ||
-			strpos($article->attribs, '"autorenaliase":["') === false
+			$context !== 'com_content.article'
+			|| empty($article->attribs)
+			|| strpos($article->attribs, '"autorenaliase":["') === false
 		){
 			return true;
 		}
-		self::deleteAutoraliase($article);
-	} # onContentAfterDelete
 
- protected function deleteAutoraliase($article)
+		self::deleteAutoraliase($article);
+	}
+
+	/*
+	* Alte Einträge des $article löschen, damit ggf. aufgefrischtes INSERT möglich.
+	*/
+	protected function deleteAutoraliase($article)
 	{
-		// Alte Einträge des $article löschen, auch damit ggf. aufgefrischtes INSERT möglich.
+		//
 		$query = $this->db->getQuery(true)
-		->delete($this->db->qn($this->MapTable))
-		->where($this->db->qn('content_id') . ' = ' . (int)$article->id);
+			->delete($this->db->qn($this->MapTable))
+			->where($this->db->qn('content_id') . ' = ' . (int) $article->id);
 		$this->db->setQuery($query);
 		$this->db->execute();
-	} # deleteAutoraliase
+	}
 
 	/*
 	Zusätzlich zu autorenaliase (Autorbeschreubung) in $article->attribs
@@ -724,9 +660,9 @@ instance of Jreistry.
 	public function onContentAfterSave($context, $article, $isNew)
 	{
 		if (
-		 $context != 'com_content.article' ||
-			empty ($article->attribs) ||
-			strpos($article->attribs, '"autorenaliase":["') === false
+			$context !== 'com_content.article'
+			|| empty ($article->attribs)
+			|| strpos($article->attribs, '"autorenaliase":["') === false
 		){
 			return true;
 		}
@@ -734,57 +670,53 @@ instance of Jreistry.
 		self::deleteAutoraliase($article);
 
 		// Neue aus $article->attribs
-		$Paras = new JRegistry();
+		$Paras = new Registry();
 		$Paras->loadString($article->attribs);
 		$autorenaliasIds = $Paras->get('autorenaliase');
 		$query = $this->db->getQuery(true)
-		->insert($this->db->qn($this->MapTable))
-		->columns(
-		 array(
-			$this->db->qn('content_id'),
-			$this->db->qn('contact_id')
-			)
-		);
+			->insert($this->db->qn($this->MapTable))
+			->columns([$this->db->qn('content_id'), $this->db->qn('contact_id')]);
+
 		foreach ($autorenaliasIds as $id)
 		{
-			$query->values(
-			 (int)$article->id.','.(int)$id
-			);
+			$query->values((int) $article->id . ',' . (int) $id);
 		}
+
 		$this->db->setQuery($query);
 		$this->db->execute();
 
 		return true;
-	} # onContentAfterSave
+	}
 
 	/*
-	 Eigentlich unnötig, da validate schon per Javascript gemacht wird,
-		mittels required="true" in der XML-Datei.
+	Eigentlich unnötig, da validate schon per Javascript gemacht wird,
+	mittels required="true" in der XML-Datei.
 	*/
- public function onContentBeforeSave($context, $article, $isNew)
+	public function onContentBeforeSave($context, $article, $isNew)
 	{
 		$allowed_context = array('com_content.article');
 		$option = $this->app->input->get('option', '', 'cmd');
 		$layout = $this->app->input->get('layout', '', 'cmd');
+
 		if (
-		 $this->app->isClient('administrator') &&
-			in_array($context, $allowed_context) &&
-		 $layout == 'edit'
-		)
-		{
-			$attribs = new JRegistry;
+			$this->app->isClient('administrator')
+			&& in_array($context, $allowed_context)
+			&& $layout == 'edit'
+		){
+			$attribs = new Registry;
 			$attribs->loadString($article->attribs);
 			$attribs = $attribs->toObject();
-			if (
-			 !is_array($attribs->autorenaliase) ||
-				!count($attribs->autorenaliase)
-			)
+
+			if (!is_array($attribs->autorenaliase) || !count($attribs->autorenaliase))
 			{
-				$this->app->enqueueMessage(JText::_('PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORENALIASE_IS_EMPTY'), 'error');
+				$this->app->enqueueMessage(
+					Text::_('PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORENALIASE_IS_EMPTY'),
+					'error'
+				);
 				return false;
 			}
 		}
-	} # onContentBeforeSave
+	}
 
 	protected function _parseOpts($str)
 	{
@@ -808,5 +740,40 @@ instance of Jreistry.
 			}
 		}
 		return $opts;
+	}
+
+
+	protected function TplHelpGhsvsLoader()
+	{
+		if (
+		 !self::$TEMPLATEHELPERMESSAGESENT &&
+			!self::$TMPLHELPERLOADED
+		)
+		{
+			$template = JFactory::getApplication()->getTemplate();
+
+			if(
+				!($TplHelpGhsvs = JLoader::import(
+					"templates.$template.html.helpersghsvs.TplHelpGhsvs",
+					JPATH_SITE
+				))
+			){
+				$TplHelpGhsvsError =
+					'Could not load template helper: '.str_replace(
+						'.', '/',
+						"templates.$template.html.helpersghsvs.TplHelpGhsvs"
+					).' in Plugin '.$this->_name;
+				JFactory::getApplication()->enqueueMessage($TplHelpGhsvsError);
+				#throw new RuntimeException($error, 500);
+				self::$TEMPLATEHELPERMESSAGESENT = true;
+				self::$TMPLHELPERLOADED = false;
+				return false;
+			}
+			else
+			{
+			 self::$TMPLHELPERLOADED = true;
+				return true;
+			}
+		}
 	}
 }
