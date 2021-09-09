@@ -12,7 +12,6 @@
 			<field name="autorenaliasespacer" type="spacer"
 			 label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORENALIASE_DESC" />
 			<field name="autorenaliase" type="autorenaliase"
-				description=""
 				class=""
 				abCatAlias="autorbeschreibungghsvs"
 				multiple="true"
@@ -21,16 +20,15 @@
 				<option value="JNONE">JNONE</option>
 			</field>
 
-			<field name="zitierweise_active" type="list" default="1"
-				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL"
-				description="">
+			<field name="zitierweise_active" type="list" default="1" filter="integer"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_ZITIERWEISE_ACTIVE_LBL">
 				<option value="1">JYES</option>
 				<option value="0">JNO</option>
 			</field>
 
 			<field name="autorbeschreibung_active" type="list" default="1"
-				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL"
-				description="">
+				filter="integer"
+				label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_AUTORBESCHREIBUNG_ACTIVE_LBL">
 				<option value="1">JYES</option>
 				<option value="0">JNO</option>
 			</field>
