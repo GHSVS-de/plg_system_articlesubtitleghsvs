@@ -43,7 +43,6 @@
 		<folder>myforms</folder>
 		<folder>sql</folder>
 		<folder>test</folder>
-		<folder>tmpl</folder>
 		<filename>installerScript.php</filename>
 		<filename>LICENSE.txt</filename>
 		<filename>resize.php</filename>
