@@ -57,10 +57,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	protected $resizer = false;
 	protected $isBlogGhsvsListe = false;
 
-	// Damit Templatehelper-Ladewarnung nur 1x angezeigt wird:
-	private static $TEMPLATEHELPERMESSAGESENT = false;
-	private static $TMPLHELPERLOADED = false;
-
 	function __construct(&$subject, $config = array())
 	{
 		parent::__construct($subject, $config);
@@ -413,47 +409,39 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		ArticleSubtitleGhsvsHelper::getAutorenNamesFromContactAliase($article,
 			$this->params);
 
-		self::TplHelpGhsvsLoader();
+		// Liefert $Item->combinedCatsGhsvs
+		ArticleSubtitleGhsvsHelper::combineCats($article);
 
-		if (self::$TMPLHELPERLOADED)
+		//	Liefert $item->concatedTagsGhsvs
+		ArticleSubtitleGhsvsHelper::setTagsNamesToItem($article);
+
+	// 2015-07-22, da Module ausgelassen wurden.
+		$txtKey = !empty($article->text) ? 'text' : (!empty($article->introtext) ? 'introtext' : '');
+		$clearPlaceholder = $this->params->get('clear_plugin_placeholders', 1);
+		$clearImages = $this->params->get('clear_images', 1);
+		$replaceHx = $this->params->get('replace_hx', 1);
+
+		if ($txtKey)
 		{
-			// Liefert $Item->combinedCatsGhsvs
-			TplHelpGhsvs::combineCats($article);
-
-			//	Liefert $item->concatedTagsGhsvs
-			TplHelpGhsvs::setTagsNamesToItem($article);
-
-			//	Liefert $item->concatedCatTagsGhsvs sowie Object $item->tagsCatGhsvs
-			TplHelpGhsvs::setCatTagsToItem($article);
-
-   // 2015-07-22, da Module ausgelassen wurden.
-			$txtKey = !empty($article->text) ? 'text' : (!empty($article->introtext) ? 'introtext' : '');
-			$clearPlaceholder = $this->params->get('clear_plugin_placeholders', 1);
-			$clearImages = $this->params->get('clear_images', 1);
-			$replaceHx = $this->params->get('replace_hx', 1);
-
-			if ($txtKey)
+			if ($clearPlaceholder)
 			{
-				if ($clearPlaceholder)
-				{
-					// Alle Pluginplatzhalter aus Text entfernen.
-					// Für Artikel oben auf 0 gesetzt.
-					TplHelpGhsvs::clearPluginPlaceholders($article->$txtKey);
-				}
+				// Alle Pluginplatzhalter aus Text entfernen.
+				// Für Artikel oben auf 0 gesetzt.
+				ArticleSubtitleGhsvsHelper::clearPluginPlaceholders($article->$txtKey);
+			}
 
-				if ($replaceHx)
-				{
-					// Alle Header-Tags Hx im Text durch P ersetzen.
-					// Für Artikel oben auf 0 gesetzt.
-					TplHelpGhsvs::replaceHxByParagraph($article->$txtKey);
-				}
+			if ($replaceHx)
+			{
+				// Alle Header-Tags Hx im Text durch P ersetzen.
+				// Für Artikel oben auf 0 gesetzt.
+				ArticleSubtitleGhsvsHelper::replaceHxByParagraph($article->$txtKey);
+			}
 
-				if ($clearImages)
-				{
-					// Alle Bilder aus Text entfernen.
-					// Für Artikel oben auf 0 gesetzt.
-					TplHelpGhsvs::ClearIMGTag($article->$txtKey);
-				}
+			if ($clearImages)
+			{
+				// Alle Bilder aus Text entfernen.
+				// Für Artikel oben auf 0 gesetzt.
+				ArticleSubtitleGhsvsHelper::ClearIMGTag($article->$txtKey);
 			}
 		}
 
@@ -728,38 +716,4 @@ instance of Jreistry.
 		return $opts;
 	}
 
-
-	protected function TplHelpGhsvsLoader()
-	{
-		if (
-		 !self::$TEMPLATEHELPERMESSAGESENT &&
-			!self::$TMPLHELPERLOADED
-		)
-		{
-			$template = JFactory::getApplication()->getTemplate();
-
-			if(
-				!($TplHelpGhsvs = JLoader::import(
-					"templates.$template.html.helpersghsvs.TplHelpGhsvs",
-					JPATH_SITE
-				))
-			){
-				$TplHelpGhsvsError =
-					'Could not load template helper: '.str_replace(
-						'.', '/',
-						"templates.$template.html.helpersghsvs.TplHelpGhsvs"
-					).' in Plugin '.$this->_name;
-				JFactory::getApplication()->enqueueMessage($TplHelpGhsvsError);
-				#throw new RuntimeException($error, 500);
-				self::$TEMPLATEHELPERMESSAGESENT = true;
-				self::$TMPLHELPERLOADED = false;
-				return false;
-			}
-			else
-			{
-			 self::$TMPLHELPERLOADED = true;
-				return true;
-			}
-		}
-	}
 }
