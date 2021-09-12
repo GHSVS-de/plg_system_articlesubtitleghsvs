@@ -39,7 +39,7 @@
 		<filename plugin="{{filename}}">{{filename}}.php</filename>
 		<folder>fields</folder>
 		<folder>language</folder>
-		<folder>layouts-to-copy-to-admin-template</folder>
+		<folder>layoutsExamples</folder>
 		<folder>myforms</folder>
 		<folder>sql</folder>
 		<folder>src</folder>

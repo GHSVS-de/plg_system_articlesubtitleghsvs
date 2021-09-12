@@ -38,9 +38,6 @@ class plgSystemArticleSubtitleGhsvsInstallerScript extends InstallerScript
 		'/plugins/system/articlesubtitleghsvs/language/index.html',
 		'/plugins/system/articlesubtitleghsvs/language/en-GB/index.html',
 		'/plugins/system/articlesubtitleghsvs/myforms/index.html',
-		'/plugins/system/articlesubtitleghsvs/layouts-to-copy-to-admin-template/index.html',
-		'/plugins/system/articlesubtitleghsvs/layouts-to-copy-to-admin-template/joomla/index.html',
-		'/plugins/system/articlesubtitleghsvs/layouts-to-copy-to-admin-template/joomla/edit/index.html',
 	];
 
 	/**
@@ -51,6 +48,7 @@ class plgSystemArticleSubtitleGhsvsInstallerScript extends InstallerScript
 	 */
 	protected $deleteFolders = [
 		'/plugins/system/articlesubtitleghsvs/tmpl',
+		'/plugins/system/articlesubtitleghsvs/layouts-to-copy-to-admin-template',
 	];
 
 	public function preflight($type, $parent)
