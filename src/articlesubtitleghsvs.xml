@@ -9,19 +9,6 @@
 	<version>{{version}}</version>
 	<description>{{nameUpper}}_XML_DESCRIPTION</description>
 
-	<versionHistory>
-0.0.1:
-2015.04.23:
-- Paar Descriptions hinzugefügt.
-- ImageResizer integriert.
-- ImageResizer für Einleitungsbilder fertig.
-2015.05.08:
-- ImageResizer für Beitragsbilder fertig.
-2015.07.07:
-- Bugfix autorenaliase.php Bindestrich aus z.B. plattee-Dr. Editha Platte entfernt, da Chosen sonst Dr. nicht findet.
-- Neue Einstellung image_popupghsvs_caption und in article-default.php integriert sowie JLayout ghsvs.full_image_venobox verfeinert. In kunstkontext.xml Einstellung venoboxghsvs für Popup (Artikeloptionen) hinzugefügt.
-	</versionHistory>
-
 	<updateservers><server type="extension" priority="1" name="{{nameUpper}}">https://raw.githubusercontent.com/GHSVS-de/upadateservers/master/{{name}}-update.xml</server></updateservers>
 
 	<changelogurl>https://raw.githubusercontent.com/GHSVS-de/upadateservers/master/{{name}}-changelog.xml</changelogurl>
