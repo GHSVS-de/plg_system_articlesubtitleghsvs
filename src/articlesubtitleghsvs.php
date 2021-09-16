@@ -50,11 +50,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 	// In welchen Templates Plugin verwenden? Siehe Plugineinstellung.
 	protected $templates;
 
-	// Bildoptimierer generell aktiv?
-	protected $imageoptimizer = 0;
-
-	// new Optimiererklasse.
-	protected $resizer = false;
 	protected $isBlogGhsvsListe = false;
 
 	function __construct(&$subject, $config = array())
@@ -65,14 +60,11 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// 2015-04-24: Versteh nicht ganz. Vermutlich habe ich COM_CONTENT-Sprachplatzhalter irgendwo?
 		if ($this->app->isClient('administrator'))
 		{
-			$lang = JFactory::getLanguage();
+			$lang = Factory::getLanguage();
 			$lang->load('com_content');
 		}
 
 		$this->templates = $this->params->get('load_in_templates', array(), 'ARRAY');
-
-		// Bildoptimierer, -Resizer aktiv?
-		$this->imageoptimizer = $this->params->get('imageoptimizer', 0, 'INT');
 	}
 
 	/*
@@ -158,7 +150,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			// Sehr unflexible Krücke, um zu ermitteln, ob es sich um ein Listenlayout handelt in meinen eigenen Category-Views mit BLOGLISTTOGGLER-Button. load_in_templates
 			// Geprüft wurde schon, dass wir in featured/category-View sind.
 			// 2015-07-28: Wenigstens schon mal Check über alle aktivierten Templates hinzu.
-			// Hat was mit imageresizer zu tun.
 			foreach ($this->templates as $templ)
 			{
 				if ($layout === $templ . ':blogghsvs')
@@ -340,61 +331,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 			self::getItemAdditionals($article, $context);
 		}
 
-		// BILDOPTIMIERER
-		if ($this->imageoptimizer)
-		{
-			// In Blog, Hauptbeiträge sind nur Einleitungsbilder relevant, falls normale Bilder
-			// entfernt wurden. Siehe clean_images.
-		 if (
-			 ($this->ContinueFECat)
-				&& !$this->isBlogGhsvsListe
-				&& ($image_intro = $article->Images->get('image_intro', ''))
-				&& ($image_intro_size = $this->params->get(
-				 'image_intro_size',
-					'w=360,quality=60,maxOnly=TRUE'
-				))
-				&& count($opts = $this->_parseOpts($image_intro_size))
-			)
-		 {
-				// Class schon geladen?
-				if (!$this->resizer)
-				{
-					if(!class_exists('ImgResizeCache'))
-					{
-						require_once JPATH_PLUGINS . '/'.$this->_type.'/'.$this->_name.'/resize.php';
-					}
-					$this->resizer = new ImgResizeCache();
-				}
-				$image_intro = $this->resizer->resize($image_intro, $opts);
-				$article->Images->set('image_intro', $image_intro);
-				$article->images = $article->Images->toString();
-			}
-			// Beitragsbilder in Artikeleinzelansicht.
-		 if (
-			 $this->ContinueFE
-				&& ($image_full = $article->Images->get('image_fulltext', ''))
-				&& ($image_full_size = $this->params->get(
-				 'image_full_size',
-					'w=550,quality=70,maxOnly=TRUE'
-				))
-				&& count($opts = $this->_parseOpts($image_full_size))
-			)
-		 {
-				// Class schon geladen?
-				if (!$this->resizer)
-				{
-					if(!class_exists('ImgResizeCache'))
-					{
-						require_once JPATH_PLUGINS . '/'.$this->_type.'/'.$this->_name.'/resize.php';
-					}
-					$this->resizer = new ImgResizeCache();
-				}
-				$image_full = $this->resizer->resize($image_full, $opts);
-				$article->Images->set('image_fulltext', $image_full);
-				$article->images = $article->Images->toString();
-			}
-		} # imageoptimizer
-
 		return true;
 	}
 
@@ -443,14 +379,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 				// Für Artikel oben auf 0 gesetzt.
 				ArticleSubtitleGhsvsHelper::ClearIMGTag($article->$txtKey);
 			}
-		}
-
-		// Bspw. für Bildoptimierer
-		$article->Images = new Registry;
-
-		if (!empty($article->images))
-		{
-			$article->Images->loadString($article->images);
 		}
 	} # getItemAdditionals
 
