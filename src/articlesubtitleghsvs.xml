@@ -61,17 +61,26 @@
 					description="Leer = Alle. Das Plugin benötigt Template-Helper TplHelpGhsvs im Templateordner">
 				</field>
 
+				<field name="replaceClearSpacer" type="note"
+					class="alert alert-info"
+					label="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_REPLACECLEAR"
+					description="PLG_SYSTEM_ARTICLESUBTITLEGHSVS_REPLACECLEAR_DESC"/>
+
 				<field name="clear_plugin_placeholders" type="list" default="1"
 					filter="integer"
-					label="Pluginplatzhalter entfernen"
-					description="Entfernt störende Pluginplatzhalter aus (Intro)Texten, bspw. für Galerien. {gallery xaz}">
+					label="Pluginplatzhalter entfernen">
 					<option value="0">JNO</option>
      <option value="1">JYES</option>
 				</field>
 
 				<field name="clear_images" type="list" default="1" filter="integer"
-					label="Bilder entfernen"
-					description="Entfernt Bilder aus (Intro)Texten.">
+					label="Bilder entfernen">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field name="replace_hx" type="list" default="1" filter="integer"
+					label="Überschriften als Absatz">
 					<option value="0">JNO</option>
      <option value="1">JYES</option>
 				</field>
