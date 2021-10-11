@@ -234,9 +234,6 @@ class PlgSystemArticleSubtitleGhsvs extends CMSPlugin
 		// Pfad zu plugineigenen XML-Dateien, die article.xml ergänzen.
 		JForm::addFormPath(__DIR__ . '/myforms');
 
-		// Erzwinge Metabeschreibung:
-		$form->setFieldAttribute('metadesc', 'required', 'true');
-
 		//loads /pluginpath/myforms/articlesubtitle.xml
 		$form->loadFile('articlesubtitle', $reset = false, $path = false);
 
