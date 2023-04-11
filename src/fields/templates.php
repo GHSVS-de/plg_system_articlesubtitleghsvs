@@ -4,7 +4,7 @@
  * @license		GNU General Public License version 3 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+defined('_JEXEC') or die;
 
 /*jimport('joomla.html.html.menu');
 jimport('joomla.form.formfield')*/;
@@ -12,16 +12,16 @@ JFormHelper::loadFieldClass('list');
 class JFormFieldTemplates extends JFormFieldList
 {
 	public $type = 'Templates';
-		
+
 	protected function getOptions()
 	{
 		$options = array();
-		
+
 		$client = JApplicationHelper::getClientInfo('site', true);
-		
+
 		$db = JFactory::getDBO();
 		$query = $db->getQuery(true);
-		
+
 		$query->select('s.id, s.title, e.name as name, s.template');
 		$query->from('#__template_styles as s');
 		$query->where('s.client_id = ' . (int) $client->id);
@@ -32,18 +32,18 @@ class JFormFieldTemplates extends JFormFieldList
 		$query->where($db->quoteName('e.type') . '=' . $db->quote('template'))
 		->group('template')
 		;
-	
+
 		$db->setQuery($query);
-	
+
 		if ($error = $db->getErrorMsg()) {
 			throw new Exception($error);
-		} 
-		
-		$templates = $db->loadObjectList();			
-	
+		}
+
+		$templates = $db->loadObjectList();
+
 		foreach ($templates as $item) {
 			$options[] = JHTML::_('select.option', $item->template, $item->template);
-		}	
+		}
 
 		// Merge any additional options in the XML definition.
 		$options = array_merge(parent::getOptions(), $options);

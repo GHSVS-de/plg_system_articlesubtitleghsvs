@@ -9,7 +9,7 @@ Für Plugin autorbeschreibungghsvs, dass die Zitierweise unter Beiträgen anzeig
 da Chosen sonst Dr. nicht findet.
 
 */
-defined('JPATH_PLATFORM') or die;
+defined('_JEXEC') or die;
 JFormHelper::loadFieldClass('list');
 class JFormFieldAutorenaliase extends JFormFieldList
 {
@@ -20,7 +20,7 @@ class JFormFieldAutorenaliase extends JFormFieldList
 
 	protected function getOptions()
 	{
-		
+
   // Kategorie-Alias in Kontakte-Komponente
   $abCatAlias = $this->element['abCatAlias'] ? (string) $this->element['abCatAlias'] : (string) 'autorbeschreibungghsvs';
 		$options = array();
@@ -29,7 +29,7 @@ class JFormFieldAutorenaliase extends JFormFieldList
 		$query->from($db->qn('#__contact_details', 'd'))
 		// ->select('distinct(d.name) as value')
 		->select($db->qn('d.id', 'value'));
-		
+
 		$query->select('CONCAT(d.alias, " ", d.name) as text')
 		->join('LEFT', $db->qn('#__categories', 'c').' ON c.id = d.catid')
 		->where('d.published = 1')
@@ -37,10 +37,10 @@ class JFormFieldAutorenaliase extends JFormFieldList
 		->where('c.extension = '.$db->q('com_contact'))
 		->order('d.alias ASC')
 		;
-		
+
   $blist = array(JHTML::_('select.option', '', JText::_('--Alias wählen--')));
   $db->setQuery($query);
-			
+
   // Return the result
   if ($options = $db->loadObjectList())
   {
